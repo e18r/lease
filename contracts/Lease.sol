@@ -27,7 +27,7 @@ contract Lease {
 		uint _deposit)
     public {
     require(_owner != _tenant);
-    require(_start > now);
+    require(now < _start);
     require(_fee > 0);
     require(_deposit >= _fee * 2);
     owner = _owner;
@@ -43,12 +43,12 @@ contract Lease {
   function () external payable {
     require(msg.sender == tenant);
     require(tenantState != Logic.State.defaulted);
-    require(end == 0 || now <= end);
+    require(end == 0 || getTime() <= end);
   }
 
   function openDoor() external view returns (bool) {
-    if (now >= start && tenantState != Logic.State.defaulted
-	&& (end == 0 || now <= end)) {
+    if (getTime() >= start && tenantState != Logic.State.defaulted
+	&& (end == 0 || getTime() <= end)) {
       return msg.sender == tenant;
     }
     else {
@@ -58,7 +58,7 @@ contract Lease {
   
   function withdraw() external {
     require(msg.sender == owner);
-    uint month = Logic.getMonth(now, start);
+    uint month = Logic.getMonth(getTime(), start);
     uint withdrawable = Logic.getWithdrawable(address(this).balance, fee,
 					       uint(tenantState), withdrawn,
 					       month);
@@ -66,17 +66,19 @@ contract Lease {
     owner.transfer(withdrawable);
   }
 
-  function sendTerminationNotice(uint _end) external {
+  function notifyTermination(uint _end) external {
+    require(msg.sender == owner || msg.sender == tenant);
+    require(getTime() >= start);
     require(end == 0);
-    require(msg.sender == tenant || msg.sender == owner);
-    require(_end >= now + 30 days || tenantState == Logic.State.defaulted);
+    require(_end >= getTime() + 30 days
+	    || tenantState == Logic.State.defaulted);
     emit TerminationNotice(_end);
     end = _end;
   }
   
   function terminate() external {
     require(msg.sender == owner || msg.sender == tenant);
-    require(now > end);
+    require(getTime() > end);
     require(address(this).balance == 0);
     emit Terminated();
     selfdestruct(owner);
@@ -84,8 +86,8 @@ contract Lease {
   
   function withdrawRemainder() external {
     require(msg.sender == tenant);
-    require(now >= end + 30 days);
-    uint month = Logic.getMonth(now, start);
+    require(getTime() >= end + 30 days);
+    uint month = Logic.getMonth(getTime(), start);
     uint withdrawable = Logic.getWithdrawable(address(this).balance, fee,
 					       uint(tenantState), withdrawn,
 					       month);
@@ -95,7 +97,7 @@ contract Lease {
   }
 
   function updateTenantState() external {
-    uint month = Logic.getMonth(now, start);
+    uint month = Logic.getMonth(getTime(), start);
     int tenantBalance = Logic.getTenantBalance(address(this).balance, fee,
 						deposit, withdrawn, month);
     tenantState = Logic.State(Logic.getTenantState(fee, deposit, month,
@@ -106,6 +108,10 @@ contract Lease {
     else if (tenantState == Logic.State.defaulted) {
       emit TenantDefaulted(tenantBalance);
     }
+  }
+  
+  function getTime() public view returns (uint) {
+    return now;
   }
 
 }

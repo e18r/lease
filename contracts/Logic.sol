@@ -62,4 +62,5 @@ library Logic {
       return 1 + (_now - _start) / (30 days);
     }
   }
+
 }

@@ -5,6 +5,8 @@ import "./Logic.sol";
 
 contract LeaseMock is Lease {
 
+  uint time;
+
   function LeaseMock(
 		     address _owner,
 		     address _tenant,
@@ -13,8 +15,17 @@ contract LeaseMock is Lease {
 		     uint _deposit)
     public Lease(_owner, _tenant, _start, _fee, _deposit) {}
 
-  function mockStart(uint _start) public {
-    start = _start;
+  function mockTime(uint _time) public {
+    time = _time;
+  }
+
+  function getTime() public view returns (uint) {
+    if(time != 0) {
+      return time;
+    }
+    else {
+      return now;
+    }
   }
 
   function mockEnd(uint _end) public {
