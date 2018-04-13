@@ -1,4 +1,3 @@
-const Lease = artifacts.require("./LeaseMock.sol");
 const helper = require("./helper.js");
 const assertThrowsAsync = helper.assertThrowsAsync;
 const now = helper.now;
@@ -10,6 +9,8 @@ const TENANT = 2;
 const ROBBER = 3;
 const BELATED = 1;
 const DEFAULTED = 2;
+
+const Lease = artifacts.require("./LeaseMock.sol");
 
 async function newLease(accounts) {
     let owner = accounts[OWNER];
@@ -103,12 +104,13 @@ contract("Lease", async (accounts) => {
 	it("should allow payments from the tenant", async () => {
 	    let instance = await newLease(accounts);
 	    let balance0 = web3.eth.getBalance(instance.address).toNumber();
+	    let amount = 1*ether;
 	    let tx = {from:accounts[TENANT], to:instance.address,
-		      value:1*ether};
+		      value:amount};
 	    web3.eth.sendTransaction(tx);
 	    let balance1 = web3.eth.getBalance(instance.address).toNumber();
 	    let balance = balance1 - balance0;
-	    assert.equal(balance, 1*ether);
+	    assert.equal(balance, amount);
 	});
 
 	it("should disallow payments not coming from the tenant", async () => {
@@ -151,12 +153,12 @@ contract("Lease", async (accounts) => {
 	    let instance = await newLease(accounts);
 	    let balance0 = web3.eth.getBalance(instance.address);
 	    await instance.mockEnd(now + 2*months);
-	    let tx = {from:accounts[TENANT], to:instance.address,
-		      value:1*ether};
+	    let amount = 1*ether;
+	    let tx = {from:accounts[TENANT], to:instance.address, value:amount};
 	    web3.eth.sendTransaction(tx);
 	    let balance1 = web3.eth.getBalance(instance.address);
 	    let balance = balance1 - balance0;
-	    assert.equal(balance, 1*ether);
+	    assert.equal(balance, amount);
 	});
 
 	it("disallows payments if the end date is in the past", async () => {
@@ -171,6 +173,31 @@ contract("Lease", async (accounts) => {
 		},
 		    /revert/
 	    );
+	});
+
+	it("disallows payments if the amount is zero", async () => {
+	    let instance = await newLease(accounts);
+	    let tx = {from:accounts[TENANT], to:instance.address, value:0};
+	    assert.throws(
+		() => {
+		    web3.eth.sendTransaction(tx);
+		},
+		    /revert/
+	    );
+	});
+
+	it("emits an event upon a successful payment", async () => {
+	    let instance = await newLease(accounts);
+	    let amount = 1*ether;
+	    let tx = {from:accounts[TENANT], to:instance.address, value:amount};
+	    let tenantPaid = instance.TenantPaid();
+	    tenantPaid.watch((error, result) => {
+		assert.equal("TenantPaid", result.event);
+		assert.ok("amount" in result.args);
+		assert.equal(amount, result.args.amount);
+	    });
+	    web3.eth.sendTransaction(tx);
+	    tenantPaid.stopWatching();
 	});
 	
     });
@@ -240,7 +267,7 @@ contract("Lease", async (accounts) => {
 	
 	it("shouldn't allow the tenant to withdraw", async () => {
 	    let instance = await newLease(accounts);
- 	    assertThrowsAsync(
+ 	    await assertThrowsAsync(
 		async () => {
 		    await instance.withdraw({from:accounts[TENANT]});
 		},
@@ -357,7 +384,7 @@ contract("Lease", async (accounts) => {
 	it("cannot be called before the start date", async () => {
 	    let instance = await newLease(accounts);
 	    let end = now + 3*months;
-	    assertThrowsAsync(
+	    await assertThrowsAsync(
 		async () => {
 		    await instance.notifyTermination(end,
 						     {from:accounts[OWNER]});
@@ -382,11 +409,25 @@ contract("Lease", async (accounts) => {
 	    assert.equal(end, await instance.end());
 	});
 
+	it("should emit an event upon being called", async () => {
+	    let instance = await newLease(accounts);
+	    await instance.mockTime(now + 1*months);
+	    let end = now + 3*months;
+	    let terminationNotice = instance.TerminationNotice();
+	    terminationNotice.watch((error, result) => {
+		assert.equal("TerminationNotice", result.event);
+		assert.ok("end" in result.args);
+		assert.equal(end, result.args.end);
+	    });
+	    await instance.notifyTermination(end, {from:accounts[OWNER]});
+	    terminationNotice.stopWatching();
+	});
+
 	it("shouldn't allow a third party to call it", async () => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 1*months);
 	    let end = now + 3*months;
-	    assertThrowsAsync(
+	    await assertThrowsAsync(
 		async () => {
 		    await instance.notifyTermination(end,
 						     {from:accounts[ROBBER]});
@@ -401,7 +442,7 @@ contract("Lease", async (accounts) => {
 	    let end = now + 3*months;
 	    await instance.notifyTermination(end,
 					     {from:accounts[TENANT]});
-	    assertThrowsAsync(
+	    await assertThrowsAsync(
 		async () => {
 		    await instance.notifyTermination(end + 1*months,
 						     {from:accounts[OWNER]});
@@ -414,7 +455,7 @@ contract("Lease", async (accounts) => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 1*months);
 	    let end = now + 1.5*months;
-	    assertThrowsAsync(
+	    await assertThrowsAsync(
 		async () => {
 		    await instance.notifyTermination(end,
 						     {from:accounts[OWNER]});

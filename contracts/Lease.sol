@@ -13,7 +13,8 @@ contract Lease {
   Logic.State public tenantState;
   uint public withdrawn;
   uint public end;
-  
+
+  event TenantPaid(uint amount);
   event TenantBelated(int tenantBalance);
   event TenantDefaulted(int tenantBalance);
   event TerminationNotice(uint end);
@@ -44,6 +45,8 @@ contract Lease {
     require(msg.sender == tenant);
     require(tenantState != Logic.State.defaulted);
     require(end == 0 || getTime() <= end);
+    require(msg.value > 0);
+    emit TenantPaid(msg.value);
   }
 
   function openDoor() external view returns (bool) {
