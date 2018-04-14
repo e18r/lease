@@ -1,3 +1,4 @@
+// taken from https://stackoverflow.com/a/46957474/2430274
 async function assertThrowsAsync(fn, regExp) {
     let f = () => {};
     try {
