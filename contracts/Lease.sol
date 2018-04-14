@@ -81,6 +81,7 @@ contract Lease {
   
   function terminate() external {
     require(msg.sender == owner || msg.sender == tenant);
+    require(end != 0);
     require(getTime() > end);
     require(address(this).balance == 0);
     emit Terminated();

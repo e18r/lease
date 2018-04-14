@@ -474,6 +474,96 @@ contract("Lease", async (accounts) => {
 	});
 	
     });
+
+    describe("terminate()", async () => {
+
+	it("can be called by the owner", async () => {
+	    let instance = await newLease(accounts);
+	    await instance.mockEnd(now + 2*months);
+	    await instance.mockTime(now + 3*months);
+	    await instance.terminate({from:accounts[OWNER]});
+	    await assertThrowsAsync(
+		async () => {
+		    await instance.getTime();
+		},
+		    /not a contract/
+	    );
+	});
+
+	it("can be called by the tenant", async () => {
+	    let instance = await newLease(accounts);
+	    await instance.mockEnd(now + 2*months);
+	    await instance.mockTime(now + 3*months);
+	    await instance.terminate({from:accounts[TENANT]});
+	    await assertThrowsAsync(
+		async () => {
+		    await instance.getTime();
+		},
+		    /not a contract/
+	    );
+	});
+
+	it("cannot be called by a third party", async () => {
+	    let instance = await newLease(accounts);
+	    await instance.mockEnd(now + 2*months);
+	    await instance.mockTime(now + 3*months);
+	    await assertThrowsAsync(
+		async () => {
+		    await instance.terminate({from:accounts[ROBBER]});
+		},
+		    /revert/
+	    );
+	});
+
+	it("cannot be called if the end date is 0", async () => {
+	    let instance = await newLease(accounts);
+	    await assertThrowsAsync(
+		async () => {
+		    await instance.terminate({from:accounts[OWNER]});
+		},
+		    /revert/
+	    );
+	});
+
+	it("cannot be called if the end date is in the future", async () => {
+	    let instance = await newLease(accounts);
+	    await instance.mockTime(now + 2*months);
+	    await instance.mockEnd(now + 2*months + 1*days);
+	    await assertThrowsAsync(
+		async () => {
+		    await instance.terminate({from:accounts[OWNER]});
+		},
+		    /revert/
+	    );
+	});
+
+	it("cannot be called if the contract has balance", async () => {
+	    let instance = await newLease(accounts);
+	    let tx = {from:accounts[TENANT], to:instance.address, value:1};
+	    web3.eth.sendTransaction(tx);
+	    await instance.mockEnd(now + 2*months);
+	    await instance.mockTime(now + 3*months);
+	    await assertThrowsAsync(
+		async () => {
+		    await instance.terminate({from:accounts[OWNER]});
+		},
+		    /revert/
+	    );
+	});
+
+	it("should emit an event upon termination", async () => {
+	    let instance = await newLease(accounts);
+	    await instance.mockEnd(now + 2*months);
+	    await instance.mockTime(now + 3*months);
+	    let terminated = instance.Terminated();
+	    terminated.watch((error, result) => {
+		assert.equal("Terminated", result.event);
+	    });
+	    await instance.terminate({from:accounts[OWNER]});
+	    terminated.stopWatching();
+	});
+	
+    });
     
 });
 
