@@ -1,3 +1,12 @@
+const helper = require("./helper.js");
+const now = helper.now;
+const days = helper.days;
+const months = helper.months;
+const ether = helper.ether;
+const ONTIME = helper.ONTIME;
+const BELATED = helper.BELATED;
+const DEFAULTED = helper.DEFAULTED;
+
 let Logic = artifacts.require("./Logic.sol");
 
 contract("Logic", async (accounts) => {
@@ -6,41 +15,41 @@ contract("Logic", async (accounts) => {
 
 	it("returns the entire balance if the tenant defaulted", async () => {
 	    let instance = await Logic.deployed();
-	    let balance = web3.toWei(10);
-	    let fee = web3.toWei(1);
-	    let tenantState = 2;
-	    let withdrawn = web3.toWei(2);
+	    let balance = 10*ether;
+	    let fee = 1*ether;
+	    let tenantState = DEFAULTED;
+	    let withdrawn = 2*ether;
 	    let month = 3;
 	    let withdrawable = await instance.getWithdrawable(balance, fee,
 							      tenantState,
 							      withdrawn, month);
-	    assert.equal(withdrawable, web3.toWei(10));
+	    assert.equal(withdrawable, 10*ether);
 	});
 
 	it("returns month * fee if the owner hasn't withdrawn", async () => {
 	    let instance = await Logic.deployed();
-	    let balance = web3.toWei(5);
-	    let fee = web3.toWei(2);
-	    let tenantState = 0;
-	    let withdrawn = 0;
+	    let balance = 5*ether;
+	    let fee = 2*ether;
+	    let tenantState = ONTIME;
+	    let withdrawn = 0*ether;
 	    let month = 3;
 	    let withdrawable = await instance.getWithdrawable(balance, fee,
 							      tenantState,
 							      withdrawn, month);
-	    assert.equal(withdrawable, web3.toWei(6));
+	    assert.equal(withdrawable, 6*ether);
 	});
 
 	it("returns month * fee - withdrawn", async () => {
 	    let instance = await Logic.deployed();
-	    let balance = web3.toWei(5);
-	    let fee = web3.toWei(2);
-	    let tenantState = 0;
-	    let withdrawn = web3.toWei(1);
+	    let balance = 5*ether;
+	    let fee = 2*ether;
+	    let tenantState = ONTIME;
+	    let withdrawn = 1*ether;
 	    let month = 3;
 	    let withdrawable = await instance.getWithdrawable(balance, fee,
 							      tenantState,
 							      withdrawn, month);
-	    assert.equal(withdrawable, web3.toWei(5));
+	    assert.equal(withdrawable, 5*ether);
 	});
 
     });
@@ -49,46 +58,46 @@ contract("Logic", async (accounts) => {
 
 	it("returns 0 if the tenant's balance is not negative", async () => {
 	    let instance = await Logic.deployed();
-	    let fee = web3.toWei(2);
-	    let deposit = web3.toWei(4);
+	    let fee = 2*ether;
+	    let deposit = 4*ether;
 	    let month = 3;
-	    let tenantBalance = 0;
+	    let tenantBalance = 0*ether;
 	    let tenantState = await instance.getTenantState(fee, deposit, month,
 							    tenantBalance);
-	    assert.equal(tenantState, 0);
+	    assert.equal(tenantState, ONTIME);
 	});
 
 	it("returns 1 if tenantBalance + deposit >= fee", async () => {
 	    let instance = await Logic.deployed();
-	    let fee = web3.toWei(1);
-	    let deposit = web3.toWei(2);
+	    let fee = 1*ether;
+	    let deposit = 2*ether;
 	    let month = 1;
-	    let tenantBalance = web3.toWei(-1);
+	    let tenantBalance = -1*ether;
 	    let tenantState = await instance.getTenantState(fee, deposit, month,
 							    tenantBalance);
-	    assert.equal(tenantState, 1);
+	    assert.equal(tenantState, BELATED);
 	});
 
 	it("returns 1 if month == 0", async () => {
 	    let instance = await Logic.deployed();
-	    let fee = web3.toWei(1);
-	    let deposit = web3.toWei(2);
+	    let fee = 1*ether;
+	    let deposit = 2*ether;
 	    let month = 0;
-	    let tenantBalance = web3.toWei(-2);
+	    let tenantBalance = -2*ether;
 	    let tenantState = await instance.getTenantState(fee, deposit, month,
 							    tenantBalance);
-	    assert.equal(tenantState, 1);
+	    assert.equal(tenantState, BELATED);
 	});
 
 	it("returns 2 if tenantBalance + deposit < fee", async () => {
 	    let instance = await Logic.deployed();
-	    let fee = web3.toWei(1);
-	    let deposit = web3.toWei(2);
+	    let fee = 1*ether;
+	    let deposit = 2*ether;
 	    let month = 2;
-	    let tenantBalance = web3.toWei(-2);
+	    let tenantBalance = -2*ether;
 	    let tenantState = await instance.getTenantState(fee, deposit, month,
 							    tenantBalance);
-	    assert.equal(tenantState, 2);
+	    assert.equal(tenantState, DEFAULTED);
 	});
 	
     });
@@ -97,30 +106,30 @@ contract("Logic", async (accounts) => {
 
 	it("returns a positive balance", async () => {
 	    let instance = await Logic.deployed();
-	    let balance = web3.toWei(9);
-	    let fee = web3.toWei(2);
-	    let deposit = web3.toWei(4);
-	    let withdrawn = web3.toWei(1);
+	    let balance = 9*ether;
+	    let fee = 2*ether;
+	    let deposit = 4*ether;
+	    let withdrawn = 1*ether;
 	    let month = 2;
 	    let tenantBalance = await instance.getTenantBalance(balance, fee,
 								deposit,
 								withdrawn,
 								month);
-	    assert.equal(tenantBalance, web3.toWei(2));
+	    assert.equal(tenantBalance, 2*ether);
 	});
 
 	it("returns a negative balance", async () => {
 	    let instance = await Logic.deployed();
-	    let balance = web3.toWei(5);
-	    let fee = web3.toWei(2);
-	    let deposit = web3.toWei(4);
-	    let withdrawn = web3.toWei(1);
+	    let balance = 5*ether;
+	    let fee = 2*ether;
+	    let deposit = 4*ether;
+	    let withdrawn = 1*ether;
 	    let month = 2;
 	    let tenantBalance = await instance.getTenantBalance(balance, fee,
 								deposit,
 								withdrawn,
 								month);
-	    assert.equal(tenantBalance, web3.toWei(-2));
+	    assert.equal(tenantBalance, -2*ether);
 	});
 	
     });
@@ -129,10 +138,10 @@ contract("Logic", async (accounts) => {
 
 	it("returns balance - withdrawable", async () => {
 	    let instance = await Logic.deployed();
-	    let balance = web3.toWei(10);
-	    let withdrawable = web3.toWei(8);
+	    let balance = 10*ether;
+	    let withdrawable = 8*ether;
 	    let remainder = await instance.getRemainder(balance, withdrawable);
-	    assert.equal(remainder, web3.toWei(2));
+	    assert.equal(remainder, 2*ether);
 	});
 
     });
@@ -141,26 +150,59 @@ contract("Logic", async (accounts) => {
 
 	it("returns 0 if start is in the future", async () => {
 	    let instance = await Logic.deployed();
-	    let now = Math.round(Date.now() / 1000);
-	    let start = now + 10000;
+	    let start = now + 15*days;
 	    let month = await instance.getMonth(now, start);
 	    assert.equal(month, 0);
 	});
 
 	it("returns 1 on the first month", async () => {
 	    let instance = await Logic.deployed();
-	    let now = Math.round(Date.now() / 1000);
-	    let start = now - 10000;
+	    let start = now - 15*days;
 	    let month = await instance.getMonth(now, start);
 	    assert.equal(month, 1);
 	});
 
 	it("returns 22 on the 22nd month", async () => {
 	    let instance = await Logic.deployed();
-	    let start = Math.round(Date.now() / 1000);
-	    let now = start + 21*30*24*60*60 + 10000;
+	    let start = now - 21*months - 15*days;
 	    let month = await instance.getMonth(now, start);
 	    assert.equal(month, 22);
+	});
+	
+    });
+
+    describe("getActualEnd()", async () => {
+
+	it("if the early end is 2.5 months, returns 3 months", async () => {
+	    let instance = await Logic.deployed();
+	    let start = now;
+	    let earlyEnd = now + 2*months + 15*days;
+	    let actualEnd = await instance.getActualEnd(start, earlyEnd);
+	    assert.equal(now + 3*months, actualEnd);
+	});
+
+	it("if the early end is 3 months, returns 3 months", async () => {
+	    let instance = await Logic.deployed();
+	    let start = now;
+	    let earlyEnd = now + 3*months;
+	    let actualEnd = await instance.getActualEnd(0, months);
+	    assert.equal(months, actualEnd.toNumber());
+	});
+
+	it("if the early end is 8 months 1 day, returns 9 months", async () => {
+	    let instance = await Logic.deployed();
+	    let start = now;
+	    let earlyEnd = now + 8*months + 1*days;
+	    let actualEnd = await instance.getActualEnd(start, earlyEnd);
+	    assert.equal(now + 9*months, actualEnd);
+	});
+
+	it("if the early end is 8m 0d 23:59:59, returns 8 months", async () => {
+	    let instance = await Logic.deployed();
+	    let start = now;
+	    let earlyEnd = now + 8*months + 1*days - 1;
+	    let actualEnd = await instance.getActualEnd(start, earlyEnd);
+	    assert.equal(now + 8*months, actualEnd);
 	});
 	
     });

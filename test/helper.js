@@ -21,3 +21,11 @@ exports.days = days;
 exports.months = months;
 
 exports.ether = web3.toWei(1);
+
+exports.OWNER = 1;
+exports.TENANT = 2;
+exports.ROBBER = 3;
+
+exports.ONTIME = 0;
+exports.BELATED = 1;
+exports.DEFAULTED = 2;

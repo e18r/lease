@@ -4,11 +4,11 @@ const now = helper.now;
 const days = helper.days;
 const months = helper.months;
 const ether = helper.ether;
-const OWNER = 1;
-const TENANT = 2;
-const ROBBER = 3;
-const BELATED = 1;
-const DEFAULTED = 2;
+const OWNER = helper.OWNER;
+const TENANT = helper.TENANT;
+const ROBBER = helper.ROBBER;
+const BELATED = helper.BELATED;
+const DEFAULTED = helper.DEFAULTED;
 
 const Lease = artifacts.require("./LeaseMock.sol");
 
@@ -383,10 +383,10 @@ contract("Lease", async (accounts) => {
 
 	it("cannot be called before the start date", async () => {
 	    let instance = await newLease(accounts);
-	    let end = now + 3*months;
+	    let earlyEnd = now + 3*months;
 	    await assertThrowsAsync(
 		async () => {
-		    await instance.notifyTermination(end,
+		    await instance.notifyTermination(earlyEnd,
 						     {from:accounts[OWNER]});
 		},
 		    /revert/
@@ -396,40 +396,43 @@ contract("Lease", async (accounts) => {
 	it("should allow the owner to call it", async () => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 1*months);
-	    let end = now + 3*months;
-	    await instance.notifyTermination(end, {from:accounts[OWNER]});
-	    assert.equal(end, await instance.end());
+	    let earlyEnd = now + 3*months;
+	    let actualEnd = now + 3.5*months;
+	    await instance.notifyTermination(earlyEnd, {from:accounts[OWNER]});
+	    assert.equal(actualEnd, await instance.end());
 	});
 
 	it("should allow the tenant to call it", async () => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 1*months);
-	    let end = now + 3*months;
-	    await instance.notifyTermination(end, {from:accounts[TENANT]});
-	    assert.equal(end, await instance.end());
+	    let earlyEnd = now + 3*months;
+	    let actualEnd = now + 3.5*months;
+	    await instance.notifyTermination(earlyEnd, {from:accounts[TENANT]});
+	    assert.equal(actualEnd, await instance.end());
 	});
 
 	it("should emit an event upon being called", async () => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 1*months);
-	    let end = now + 3*months;
+	    let earlyEnd = now + 3*months;
+	    let actualEnd = now + 3.5*months;
 	    let terminationNotice = instance.TerminationNotice();
 	    terminationNotice.watch((error, result) => {
 		assert.equal("TerminationNotice", result.event);
-		assert.ok("end" in result.args);
-		assert.equal(end, result.args.end);
+		assert.ok("actualEnd" in result.args);
+		assert.equal(actualEnd, result.args.actualEnd);
 	    });
-	    await instance.notifyTermination(end, {from:accounts[OWNER]});
+	    await instance.notifyTermination(earlyEnd, {from:accounts[OWNER]});
 	    terminationNotice.stopWatching();
 	});
 
 	it("shouldn't allow a third party to call it", async () => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 1*months);
-	    let end = now + 3*months;
+	    let earlyEnd = now + 3*months;
 	    await assertThrowsAsync(
 		async () => {
-		    await instance.notifyTermination(end,
+		    await instance.notifyTermination(earlyEnd,
 						     {from:accounts[ROBBER]});
 		},
 		    /revert/
@@ -439,25 +442,26 @@ contract("Lease", async (accounts) => {
 	it("cannot be called twice", async () => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 1*months);
-	    let end = now + 3*months;
-	    await instance.notifyTermination(end,
+	    let earlyEnd = now + 3*months;
+	    await instance.notifyTermination(earlyEnd,
 					     {from:accounts[TENANT]});
 	    await assertThrowsAsync(
 		async () => {
-		    await instance.notifyTermination(end + 1*months,
+		    await instance.notifyTermination(earlyEnd + 1*months,
 						     {from:accounts[OWNER]});
 		},
 		    /revert/
 	    );
 	});
 
-	it("the end date can't be in less than a month...", async () => {
+	it("the actual end date can't be in less than a month...", async () => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 1*months);
-	    let end = now + 1.5*months;
+	    let earlyEnd = now + 1.5*months;
+	    let actualEnd = earlyEnd;
 	    await assertThrowsAsync(
 		async () => {
-		    await instance.notifyTermination(end,
+		    await instance.notifyTermination(earlyEnd,
 						     {from:accounts[OWNER]});
 		},
 		    /revert/
@@ -468,9 +472,10 @@ contract("Lease", async (accounts) => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 1*months);
 	    await instance.mockTenantState(DEFAULTED);
-	    let end = now + 1.5*months;
-	    await instance.notifyTermination(end, {from:accounts[OWNER]});
-	    assert.equal(end, await instance.end());
+	    let earlyEnd = now + 1.5*months;
+	    let actualEnd = earlyEnd;
+	    await instance.notifyTermination(earlyEnd, {from:accounts[OWNER]});
+	    assert.equal(actualEnd, await instance.end());
 	});
 	
     });
@@ -561,6 +566,17 @@ contract("Lease", async (accounts) => {
 	    });
 	    await instance.terminate({from:accounts[OWNER]});
 	    terminated.stopWatching();
+	});
+	
+    });
+
+    describe("withdrawRemainder()", async () => {
+
+	it.skip("can be called by the tenant", async () => {
+	    let instance = await newLease(accounts);
+	    await instance.mockEnd(now + 3*months);
+	    await instance.mockTime(now + 5*months);
+	    await instance.withdrawRemainder({from:accounts[TENANT]});
 	});
 	
     });

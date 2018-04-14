@@ -17,7 +17,7 @@ contract Lease {
   event TenantPaid(uint amount);
   event TenantBelated(int tenantBalance);
   event TenantDefaulted(int tenantBalance);
-  event TerminationNotice(uint end);
+  event TerminationNotice(uint actualEnd);
   event Terminated();
 
   function Lease(
@@ -69,14 +69,15 @@ contract Lease {
     owner.transfer(withdrawable);
   }
 
-  function notifyTermination(uint _end) external {
+  function notifyTermination(uint _earlyEnd) external {
     require(msg.sender == owner || msg.sender == tenant);
     require(getTime() >= start);
     require(end == 0);
-    require(_end >= getTime() + 30 days
+    uint actualEnd = Logic.getActualEnd(start, _earlyEnd);
+    require(actualEnd >= getTime() + 30 days
 	    || tenantState == Logic.State.defaulted);
-    emit TerminationNotice(_end);
-    end = _end;
+    emit TerminationNotice(actualEnd);
+    end = actualEnd;
   }
   
   function terminate() external {
