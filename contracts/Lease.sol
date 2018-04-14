@@ -61,7 +61,7 @@ contract Lease {
   
   function withdraw() external {
     require(msg.sender == owner);
-    uint month = Logic.getMonth(getTime(), start);
+    uint month = Logic.getMonth(getTime(), start, end);
     uint withdrawable = Logic.getWithdrawable(address(this).balance, fee,
 					       uint(tenantState), withdrawn,
 					       month);
@@ -91,8 +91,9 @@ contract Lease {
   
   function withdrawRemainder() external {
     require(msg.sender == tenant);
+    require(end != 0);
     require(getTime() >= end + 30 days);
-    uint month = Logic.getMonth(getTime(), start);
+    uint month = Logic.getMonth(getTime(), start, end);
     uint withdrawable = Logic.getWithdrawable(address(this).balance, fee,
 					       uint(tenantState), withdrawn,
 					       month);
@@ -102,7 +103,7 @@ contract Lease {
   }
 
   function updateTenantState() external {
-    uint month = Logic.getMonth(getTime(), start);
+    uint month = Logic.getMonth(getTime(), start, end);
     int tenantBalance = Logic.getTenantBalance(address(this).balance, fee,
 						deposit, withdrawn, month);
     tenantState = Logic.State(Logic.getTenantState(fee, deposit, month,

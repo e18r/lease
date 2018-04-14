@@ -53,25 +53,34 @@ library Logic {
     return _balance - _withdrawable;
   }
 
-  function getMonth(uint _now, uint _start) public pure returns (uint) {
+  function getMonth(uint _now, uint _start, uint _end)
+    public pure returns (uint month) {
     if (_now < _start) {
-      return 0;
+      month = 0;
+    }
+    else if (_end != 0 && _now > _end) {
+      month = (_end - _start) / (30 days);
     }
     else {
-      return 1 + (_now - _start) / (30 days);
+      uint duration = _now - _start;
+      uint monthFloor = duration / (30 days);
+      month = monthFloor;
+      if (duration % (30 days) != 0) {
+	month += 1;
+      }
     }
   }
 
   function getActualEnd(uint start, uint earlyEnd)
     public pure returns (uint actualEnd) {
-    uint earlyPeriod = earlyEnd - start;
-    uint earlyMonths = earlyPeriod / (30 days);
+    uint earlyDuration = earlyEnd - start;
+    uint earlyMonths = earlyDuration / (30 days);
     uint actualMonths = earlyMonths;
-    if(earlyPeriod % (30 days) >= 1 days) {
+    if(earlyDuration % (30 days) >= 1 days) {
       actualMonths += 1;
     }
-    uint actualPeriod = actualMonths * 30 days;
-    actualEnd = start + actualPeriod;
+    uint actualDuration = actualMonths * 30 days;
+    actualEnd = start + actualDuration;
   }
 
 }

@@ -148,27 +148,37 @@ contract("Logic", async (accounts) => {
 
     describe("getMonth()", async () => {
 
-	it("returns 0 if start is in the future", async () => {
+	it("returns 0 if the start date is in the future", async () => {
 	    let instance = await Logic.deployed();
 	    let start = now + 15*days;
-	    let month = await instance.getMonth(now, start);
+	    let end = 0;
+	    let month = await instance.getMonth(now, start, end);
 	    assert.equal(month, 0);
 	});
 
 	it("returns 1 on the first month", async () => {
 	    let instance = await Logic.deployed();
 	    let start = now - 15*days;
-	    let month = await instance.getMonth(now, start);
+	    let end = now + 15*days;
+	    let month = await instance.getMonth(now, start, end);
 	    assert.equal(month, 1);
 	});
 
-	it("returns 22 on the 22nd month", async () => {
+	it("returns 22 on the exact 22nd month", async () => {
 	    let instance = await Logic.deployed();
-	    let start = now - 21*months - 15*days;
-	    let month = await instance.getMonth(now, start);
-	    assert.equal(month, 22);
+	    let start = now - 22*months;
+	    let end = now + 2*months;
+	    let month = await instance.getMonth(now, start, end);
+	    assert.equal(month.toNumber(), 22);
 	});
-	
+
+	it("if the contract ended, returns its duration", async () => {
+	    let instance = await Logic.deployed();
+	    let start = now - 13*months;
+	    let end = now - 1*months;
+	    let month = await instance.getMonth(now, start, end);
+	    assert.equal(month.toNumber(), 12);
+	});
     });
 
     describe("getActualEnd()", async () => {

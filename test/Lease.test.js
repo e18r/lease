@@ -152,7 +152,7 @@ contract("Lease", async (accounts) => {
 	it("allows payments if the end date is in the future", async () => {
 	    let instance = await newLease(accounts);
 	    let balance0 = web3.eth.getBalance(instance.address);
-	    await instance.mockEnd(now + 2*months);
+	    await instance.mockEnd(now + 2.5*months);
 	    let amount = 1*ether;
 	    let tx = {from:accounts[TENANT], to:instance.address, value:amount};
 	    web3.eth.sendTransaction(tx);
@@ -164,7 +164,7 @@ contract("Lease", async (accounts) => {
 	it("disallows payments if the end date is in the past", async () => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 3*months);
-	    await instance.mockEnd(now + 2*months);
+	    await instance.mockEnd(now + 2.5*months);
 	    let tx = {from:accounts[TENANT], to:instance.address,
 		      value:1*ether};
 	    assert.throws(
@@ -240,7 +240,7 @@ contract("Lease", async (accounts) => {
 	it("if the end date is in the future, only tenant", async () => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 1*months);
-	    await instance.mockEnd(now + 12*months);
+	    await instance.mockEnd(now + 12.5*months);
 	    let tenantOpened = await instance.openDoor({from:accounts[TENANT]});
 	    let ownerOpened = await instance.openDoor({from:accounts[OWNER]});
 	    let robberOpened = await instance.openDoor({from:accounts[ROBBER]});
@@ -252,7 +252,7 @@ contract("Lease", async (accounts) => {
 	it("if the end date is in the past, only owner", async () => {
 	    let instance = await newLease(accounts);
 	    await instance.mockTime(now + 8*months)
-	    await instance.mockEnd(now + 7*months);
+	    await instance.mockEnd(now + 7.5*months);
 	    let tenantOpened = await instance.openDoor({from:accounts[TENANT]});
 	    let ownerOpened = await instance.openDoor({from:accounts[OWNER]});
 	    let robberOpened = await instance.openDoor({from:accounts[ROBBER]});
@@ -484,7 +484,7 @@ contract("Lease", async (accounts) => {
 
 	it("can be called by the owner", async () => {
 	    let instance = await newLease(accounts);
-	    await instance.mockEnd(now + 2*months);
+	    await instance.mockEnd(now + 2.5*months);
 	    await instance.mockTime(now + 3*months);
 	    await instance.terminate({from:accounts[OWNER]});
 	    await assertThrowsAsync(
@@ -497,7 +497,7 @@ contract("Lease", async (accounts) => {
 
 	it("can be called by the tenant", async () => {
 	    let instance = await newLease(accounts);
-	    await instance.mockEnd(now + 2*months);
+	    await instance.mockEnd(now + 2.5*months);
 	    await instance.mockTime(now + 3*months);
 	    await instance.terminate({from:accounts[TENANT]});
 	    await assertThrowsAsync(
@@ -510,7 +510,7 @@ contract("Lease", async (accounts) => {
 
 	it("cannot be called by a third party", async () => {
 	    let instance = await newLease(accounts);
-	    await instance.mockEnd(now + 2*months);
+	    await instance.mockEnd(now + 2.5*months);
 	    await instance.mockTime(now + 3*months);
 	    await assertThrowsAsync(
 		async () => {
@@ -546,7 +546,7 @@ contract("Lease", async (accounts) => {
 	    let instance = await newLease(accounts);
 	    let tx = {from:accounts[TENANT], to:instance.address, value:1};
 	    web3.eth.sendTransaction(tx);
-	    await instance.mockEnd(now + 2*months);
+	    await instance.mockEnd(now + 2.5*months);
 	    await instance.mockTime(now + 3*months);
 	    await assertThrowsAsync(
 		async () => {
@@ -558,7 +558,7 @@ contract("Lease", async (accounts) => {
 
 	it("should emit an event upon termination", async () => {
 	    let instance = await newLease(accounts);
-	    await instance.mockEnd(now + 2*months);
+	    await instance.mockEnd(now + 2.5*months);
 	    await instance.mockTime(now + 3*months);
 	    let terminated = instance.Terminated();
 	    terminated.watch((error, result) => {
@@ -572,11 +572,110 @@ contract("Lease", async (accounts) => {
 
     describe("withdrawRemainder()", async () => {
 
-	it.skip("can be called by the tenant", async () => {
+	it("can be called by the tenant", async () => {
 	    let instance = await newLease(accounts);
-	    await instance.mockEnd(now + 3*months);
-	    await instance.mockTime(now + 5*months);
-	    await instance.withdrawRemainder({from:accounts[TENANT]});
+	    let deposit = 2*ether;
+	    let fees = 2*ether;
+	    let tx = {from:accounts[TENANT], to:instance.address,
+		      value:deposit+fees};
+	    web3.eth.sendTransaction(tx);
+	    await instance.mockEnd(now + 2.5*months);
+	    await instance.mockTime(now + 4*months);
+	    let gasPrice = 100000000000;
+	    let balance0 = web3.eth.getBalance(accounts[TENANT]);
+	    let result = await instance.withdrawRemainder(
+		{from:accounts[TENANT]});
+	    let balance1 = web3.eth.getBalance(accounts[TENANT]);
+	    let balance = balance1.sub(balance0);
+	    let gasUsed = result.receipt.gasUsed;
+	    let txFee = gasUsed * gasPrice;
+	    let actualDeposit = balance.add(txFee);
+	    assert.equal(deposit, actualDeposit.toNumber());
+	});
+
+	it("can't be called by the owner", async () => {
+	    let instance = await newLease(accounts);
+	    let deposit = 2*ether;
+	    let fees = 2*ether;
+	    let tx = {from:accounts[TENANT], to:instance.address,
+		      value:deposit+fees};
+	    web3.eth.sendTransaction(tx);
+	    await instance.mockEnd(now + 2.5*months);
+	    await instance.mockTime(now + 4*months);
+	    await assertThrowsAsync(
+		async () => {
+		    await instance.withdrawRemainder({from:accounts[OWNER]});
+		},
+		    /revert/
+	    );
+	});
+
+	it("can't be called by a third party", async () => {
+	    let instance = await newLease(accounts);
+	    let deposit = 2*ether;
+	    let fees = 2*ether;
+	    let tx = {from:accounts[TENANT], to:instance.address,
+		      value:deposit+fees};
+	    web3.eth.sendTransaction(tx);
+	    await instance.mockEnd(now + 2.5*months);
+	    await instance.mockTime(now + 4*months);
+	    await assertThrowsAsync(
+		async () => {
+		    await instance.withdrawRemainder({from:accounts[ROBBER]});
+		},
+		    /revert/
+	    );
+	});
+
+	it("can't be called if end is zero", async () => {
+	    let instance = await newLease(accounts);
+	    let deposit = 2*ether;
+	    let fees = 2*ether;
+	    let tx = {from:accounts[TENANT], to:instance.address,
+		      value:deposit+fees};
+	    web3.eth.sendTransaction(tx);
+	    await instance.mockEnd(0);
+	    await instance.mockTime(now + 4*months);
+	    await assertThrowsAsync(
+		async () => {
+		    await instance.withdrawRemainder({from:accounts[TENANT]});
+		},
+		    /revert/
+	    );
+	});
+
+	it("can't be called if the contract hasn't ended", async () => {
+	    let instance = await newLease(accounts);
+	    let deposit = 2*ether;
+	    let fees = 2*ether;
+	    let tx = {from:accounts[TENANT], to:instance.address,
+		      value:deposit+fees};
+	    web3.eth.sendTransaction(tx);
+	    await instance.mockTime(now + 4*months);
+	    await instance.mockEnd(now + 4.1*months);
+	    await assertThrowsAsync(
+		async () => {
+		    await instance.withdrawRemainder({from:accounts[TENANT]});
+		},
+		    /revert/
+	    );
+	});
+
+	it("can't be called if the contract hasn't ended", async () => {
+	    let instance = await newLease(accounts);
+	    let deposit = 2*ether;
+	    let fees = 2*ether;
+	    let tx = {from:accounts[TENANT], to:instance.address,
+		      value:deposit+fees};
+	    web3.eth.sendTransaction(tx);
+	    await instance.mockTime(now + 4*months);
+	    await instance.mockEnd(now + 4.1*months);
+	    await assertThrowsAsync(
+		async () => {
+		    await instance.withdrawRemainder({from:accounts[TENANT]});
+		},
+		    /revert/
+	    );
 	});
 	
     });
