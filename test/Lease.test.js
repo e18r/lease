@@ -661,21 +661,42 @@ contract("Lease", async (accounts) => {
 	    );
 	});
 
-	it("can't be called if the contract hasn't ended", async () => {
+	it("can't be called if the contract ended < a month ago", async () => {
 	    let instance = await newLease(accounts);
 	    let deposit = 2*ether;
 	    let fees = 2*ether;
 	    let tx = {from:accounts[TENANT], to:instance.address,
 		      value:deposit+fees};
 	    web3.eth.sendTransaction(tx);
-	    await instance.mockTime(now + 4*months);
-	    await instance.mockEnd(now + 4.1*months);
+	    await instance.mockEnd(now + 3*months);
+	    await instance.mockTime(now + 4*months - 1);
 	    await assertThrowsAsync(
 		async () => {
 		    await instance.withdrawRemainder({from:accounts[TENANT]});
 		},
 		    /revert/
 	    );
+	});
+
+	it("can be called if the contract ended == a month ago", async () => {
+	    let instance = await newLease(accounts);
+	    let deposit = 2*ether;
+	    let fees = 2*ether;
+	    let tx = {from:accounts[TENANT], to:instance.address,
+		      value:deposit+fees};
+	    web3.eth.sendTransaction(tx);
+	    await instance.mockEnd(now + 3*months);
+	    await instance.mockTime(now + 4*months);
+	    let gasPrice = 100000000000;
+	    let balance0 = web3.eth.getBalance(accounts[TENANT]);
+	    let result = await instance.withdrawRemainder(
+		{from:accounts[TENANT]});
+	    let balance1 = web3.eth.getBalance(accounts[TENANT]);
+	    let balance = balance1.sub(balance0);
+	    let gasUsed = result.receipt.gasUsed;
+	    let txFee = gasUsed * gasPrice;
+	    let actualDeposit = balance.add(txFee);
+	    assert.equal(deposit, actualDeposit.toNumber());
 	});
 	
     });
