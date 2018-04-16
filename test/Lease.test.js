@@ -7,6 +7,7 @@ const ether = helper.ether;
 const OWNER = helper.OWNER;
 const TENANT = helper.TENANT;
 const ROBBER = helper.ROBBER;
+const ONTIME = helper.ONTIME;
 const BELATED = helper.BELATED;
 const DEFAULTED = helper.DEFAULTED;
 
@@ -697,6 +698,55 @@ contract("Lease", async (accounts) => {
 	    let txFee = gasUsed * gasPrice;
 	    let actualDeposit = balance.add(txFee);
 	    assert.equal(deposit, actualDeposit.toNumber());
+	});
+	
+    });
+
+    describe("updateTenantState()", async () => {
+
+	it("should update the state if it changed", async () => {
+	    let instance = await newLease(accounts);
+	    let tx = {from:accounts[TENANT], to:instance.address,
+		      value:2*ether};
+	    web3.eth.sendTransaction(tx);
+	    assert.notEqual(ONTIME, await instance.tenantState());
+	    await instance.updateTenantState({from:accounts[OWNER]});
+	    assert.equal(ONTIME, await instance.tenantState());
+	});
+
+	it("can be called by anyone", async () => {
+	    let instance = await newLease(accounts);
+	    let tx = {from:accounts[TENANT], to:instance.address,
+		      value:2*ether};
+	    web3.eth.sendTransaction(tx);
+	    assert.notEqual(ONTIME, await instance.tenantState());
+	    await instance.updateTenantState({from:accounts[ROBBER]});
+	    assert.equal(ONTIME, await instance.tenantState());
+	});
+
+	it("should emit an event if the tenant is belated", async () => {
+	    let instance = await newLease(accounts);
+	    let tenantBelated = instance.TenantBelated();
+	    tenantBelated.watch((error, result) => {
+		assert.equal("TenantBelated", result.event);
+		assert.ok("tenantBalance" in result.args);
+		assert.equal(-2*ether, result.args.tenantBalance);
+	    });
+	    await instance.updateTenantState({from:accounts[OWNER]});
+	    tenantBelated.stopWatching();
+	});
+
+	it("should emit an event if the tenant has defaulted", async () => {
+	    let instance = await newLease(accounts);
+	    await instance.mockTime(now + 1*months);
+	    let tenantDefaulted = instance.TenantDefaulted();
+	    tenantDefaulted.watch((error, result) => {
+		assert.equal("TenantDefaulted", result.event);
+		assert.ok("tenantBalance" in result.args);
+		assert.equal(-3*ether, result.args.tenantBalance);
+	    });
+	    await instance.updateTenantState({from:accounts[OWNER]});
+	    tenantDefaulted.stopWatching();
 	});
 	
     });

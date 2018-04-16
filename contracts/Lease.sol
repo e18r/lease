@@ -106,8 +106,8 @@ contract Lease {
     uint month = Logic.getMonth(getTime(), start, end);
     int tenantBalance = Logic.getTenantBalance(address(this).balance, fee,
 						deposit, withdrawn, month);
-    tenantState = Logic.State(Logic.getTenantState(fee, deposit, month,
-						     tenantBalance));
+    uint stateNumber = Logic.getTenantState(fee, deposit, month, tenantBalance);
+    tenantState = Logic.State(stateNumber);
     if (tenantState == Logic.State.belated) {
       emit TenantBelated(tenantBalance);
     }
