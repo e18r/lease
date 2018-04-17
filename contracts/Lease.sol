@@ -27,6 +27,7 @@ contract Lease {
 		uint _fee,
 		uint _deposit)
     public {
+    require(msg.sender == _owner || msg.sender == _tenant);
     require(_owner != _tenant);
     require(now < _start);
     require(_fee > 0);

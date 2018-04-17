@@ -19,20 +19,22 @@ async function newLease(accounts) {
     let start = now + 15*days;
     let fee = 1*ether;
     let deposit = 2*ether;
-    return Lease.new(owner, tenant, start, fee, deposit);
+    return Lease.new(owner, tenant, start, fee, deposit,
+		     {from:accounts[OWNER]});
 };
 
 contract("Lease", async (accounts) => {
 
     describe("constructor", async () => {
     
-	it("should initialize correctly", async () => {
+	it("should be initialized correctly by the owner", async () => {
 	    let owner = accounts[OWNER];
 	    let tenant = accounts[TENANT];
 	    let start = now + 15*days;
 	    let fee = 1*ether;
 	    let deposit = 2*ether;
-	    let instance = await Lease.new(owner, tenant, start, fee, deposit);
+	    let instance = await Lease.new(owner, tenant, start, fee, deposit,
+					   {from:accounts[OWNER]});
 	    assert.equal(owner, await instance.owner());
 	    assert.equal(tenant, await instance.tenant());
 	    assert.equal(start, await instance.start());
@@ -42,6 +44,42 @@ contract("Lease", async (accounts) => {
 	    assert.equal(0, await instance.withdrawn());
 	    assert.equal(0, await instance.end());
 	});
+    
+	it("should be initialized correctly by the tenant", async () => {
+	    let owner = accounts[OWNER];
+	    let tenant = accounts[TENANT];
+	    let start = now + 15*days;
+	    let fee = 1*ether;
+	    let deposit = 2*ether;
+	    let instance = await Lease.new(owner, tenant, start, fee, deposit,
+					   {from:accounts[TENANT]});
+	    assert.equal(owner, await instance.owner());
+	    assert.equal(tenant, await instance.tenant());
+	    assert.equal(start, await instance.start());
+	    assert.equal(fee, await instance.fee());
+	    assert.equal(deposit, await instance.deposit());
+	    assert.equal(BELATED, await instance.tenantState());
+	    assert.equal(0, await instance.withdrawn());
+	    assert.equal(0, await instance.end());
+	});
+    
+	it("should not let a third party initialize it", async () => {
+	    let owner = accounts[OWNER];
+	    let tenant = accounts[TENANT];
+	    let start = now + 15*days;
+	    let fee = 1*ether;
+	    let deposit = 2*ether;
+	    await assertThrowsAsync(
+		async () => {
+		    let instance = await Lease.new(owner, tenant, start, fee,
+						   deposit,
+						   {from:accounts[ROBBER]});
+		},
+		    /revert/
+	    );
+
+
+	});
 
 	it("should not let the owner be her own tenant", async () => {
 	    let owner = accounts[OWNER];
@@ -50,7 +88,8 @@ contract("Lease", async (accounts) => {
 	    let deposit = 2*ether;
 	    await assertThrowsAsync(
 		async () => {
-		    await Lease.new(owner, owner, start, fee, deposit);
+		    await Lease.new(owner, owner, start, fee, deposit,
+				    {from:accounts[OWNER]});
 		},
 		    /revert/
 	    );
@@ -64,7 +103,8 @@ contract("Lease", async (accounts) => {
 	    let deposit = 2*ether;
 	    await assertThrowsAsync(
 		async () => {
-		    await Lease.new(owner, tenant, start, fee, deposit);
+		    await Lease.new(owner, tenant, start, fee, deposit,
+					   {from:accounts[OWNER]});
 		},
 		    /revert/
 	    );
@@ -78,7 +118,8 @@ contract("Lease", async (accounts) => {
 	    let deposit = 2*ether;
 	    await assertThrowsAsync(
 		async () => {
-		    await Lease.new(owner, tenant, start, fee, deposit);
+		    await Lease.new(owner, tenant, start, fee, deposit,
+					   {from:accounts[OWNER]});
 		},
 		    /revert/
 	    );
@@ -92,7 +133,8 @@ contract("Lease", async (accounts) => {
 	    let deposit = 1.9*ether;
 	    await assertThrowsAsync(
 		async () => {
-		    await Lease.new(owner, tenant, start, fee, deposit);
+		    await Lease.new(owner, tenant, start, fee, deposit,
+					   {from:accounts[OWNER]});
 		},
 		    /revert/
 	    );
