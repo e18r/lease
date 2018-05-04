@@ -36,4 +36,9 @@ contract LeaseMock is Lease {
     tenantState = _tenantState;
   }
 
+  function mockZeroBalance() public {
+    owner.transfer(address(this).balance);
+    withdrawn = 0;
+  }
+
 }

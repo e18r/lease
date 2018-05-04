@@ -6,16 +6,17 @@ module.exports = (deployer) => {
 
     let owner = web3.eth.accounts[1];
     let tenant = web3.eth.accounts[2];
-    let startDate = Math.round(Date.now() / 1000) + 1000;
-    let fee = web3.toWei(1);
-    let deposit = web3.toWei(2);
+    let startDate = Math.round(Date.now() / 1000) + 15*24*60*60;
+    let fee = 1000;
+    let deposit = 2000;
+    let gasPrice = 10000000000;
     
-    deployer.deploy(Logic);
+    deployer.deploy(Logic, {gasPrice:gasPrice});
     deployer.link(Logic, [Lease, LeaseMock]);
     
     deployer.deploy(Lease, owner, tenant, startDate, fee, deposit,
-		    {from:web3.eth.accounts[1]});
+		    {from:owner, gasPrice:gasPrice});
     deployer.deploy(LeaseMock, owner, tenant, startDate, fee, deposit,
-		    {from:web3.eth.accounts[1]});
+		    {from:owner, gasPrice:gasPrice});
 
 };

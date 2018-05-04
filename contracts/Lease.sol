@@ -15,8 +15,7 @@ contract Lease {
   uint public end;
 
   event TenantPaid(uint amount);
-  event TenantBelated(int tenantBalance);
-  event TenantDefaulted(int tenantBalance);
+  event TenantStateChanged(uint stateNumber, int tenantBalance);
   event TerminationNotice(uint actualEnd);
   event Terminated();
 
@@ -96,25 +95,20 @@ contract Lease {
     require(getTime() >= end + 30 days);
     uint month = Logic.getMonth(getTime(), start, end);
     uint withdrawable = Logic.getWithdrawable(address(this).balance, fee,
-					       uint(tenantState), withdrawn,
-					       month);
-    uint remainder = Logic.getRemainder(address(this).balance,
-					       withdrawable);
+    					       uint(tenantState), withdrawn,
+    					       month);
+    uint remainder = Logic.getRemainder(address(this).balance, withdrawable);
+    require(remainder > 0);
     tenant.transfer(remainder);
   }
 
   function updateTenantState() external {
     uint month = Logic.getMonth(getTime(), start, end);
     int tenantBalance = Logic.getTenantBalance(address(this).balance, fee,
-						deposit, withdrawn, month);
+    						deposit, withdrawn, month);
     uint stateNumber = Logic.getTenantState(fee, deposit, month, tenantBalance);
     tenantState = Logic.State(stateNumber);
-    if (tenantState == Logic.State.belated) {
-      emit TenantBelated(tenantBalance);
-    }
-    else if (tenantState == Logic.State.defaulted) {
-      emit TenantDefaulted(tenantBalance);
-    }
+    emit TenantStateChanged(stateNumber, tenantBalance);
   }
   
   function getTime() public view returns (uint) {

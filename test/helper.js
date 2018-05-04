@@ -21,6 +21,9 @@ exports.days = days;
 exports.months = months;
 
 exports.ether = web3.toWei(1);
+exports.finney = 1000;
+
+exports.gasPrice = 10000000000;
 
 exports.OWNER = 1;
 exports.TENANT = 2;
