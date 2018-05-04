@@ -37,7 +37,7 @@ contract("Lease", async (accounts) => {
     	await instance.mockZeroBalance();
     });
 
-    describe.skip("constructor", async () => {
+    describe("constructor", async () => {
     
 	it("should be initialized correctly by the owner", async () => {
 	    let owner = accounts[OWNER];
@@ -155,7 +155,7 @@ contract("Lease", async (accounts) => {
 
     });
 
-    describe.skip("fallback", async () => {
+    describe("fallback", async () => {
 
 	it("should allow payments from the tenant", async () => {
 	    let instance = await Lease.deployed();
@@ -262,7 +262,7 @@ contract("Lease", async (accounts) => {
 	
     });
 
-    describe.skip("openDoor()", async () => {
+    describe("openDoor()", async () => {
 
 	it("if the start date is in the future, only owner", async () => {
 	    let instance = await Lease.deployed();
@@ -338,7 +338,7 @@ contract("Lease", async (accounts) => {
 	
     });
 
-    describe.skip("withdraw()", async () => {
+    describe("withdraw()", async () => {
 	
 	it("shouldn't allow the tenant to withdraw", async () => {
 	    let instance = await Lease.deployed();
@@ -455,7 +455,7 @@ contract("Lease", async (accounts) => {
 	
     });
 
-    describe.skip("notifyTermination()", async () => {
+    describe("notifyTermination()", async () => {
 
 	it("cannot be called before the start date", async () => {
 	    let instance = await Lease.deployed();
@@ -577,7 +577,7 @@ contract("Lease", async (accounts) => {
 	
     });
 
-    describe.skip("terminate()", async () => {
+    describe("terminate()", async () => {
 
 	it("can be called by the owner", async () => {
 	    let instance = await newLease(accounts);
@@ -673,7 +673,7 @@ contract("Lease", async (accounts) => {
 	
     });
 
-    describe.skip("withdrawRemainder()", async () => {
+    describe("withdrawRemainder()", async () => {
 
 	it("can be called by the tenant", async () => {
 	    let instance = await Lease.deployed();
@@ -873,7 +873,7 @@ contract("Lease", async (accounts) => {
 	    assert.equal(ONTIME, obtained.toNumber());
 	});
 
-	it.skip("can be called by anyone", async () => {
+	it("can be called by anyone", async () => {
 	    let instance = await Lease.deployed();
 	    let tx = {from:accounts[TENANT], to:instance.address,
 		      value:2*finney, gasPrice:gasPrice};
@@ -885,11 +885,11 @@ contract("Lease", async (accounts) => {
 	    assert.equal(ONTIME, obtained.toNumber());	    
 	});
 
-	it.skip("should emit an event if the tenant is belated", async () => {
+	it("should emit an event if the tenant is belated", async () => {
 	    let instance = await Lease.deployed();
-	    let tenantBelated = instance.TenantBelated();
+	    let tenantBelated = instance.TenantStateChanged();
 	    tenantBelated.watch((error, result) => {
-		assert.equal("TenantBelated", result.event);
+		assert.equal("TenantStateChanged", result.event);
 		assert.ok("tenantBalance" in result.args);
 		assert.equal(-2*finney, result.args.tenantBalance);
 	    });
@@ -898,12 +898,12 @@ contract("Lease", async (accounts) => {
 	    tenantBelated.stopWatching();
 	});
 
-	it.skip("should emit an event if the tenant has defaulted", async () => {
+	it("should emit an event if the tenant has defaulted", async () => {
 	    let instance = await Lease.deployed();
 	    await instance.mockTime(now + 1*months, {gasPrice:gasPrice});
-	    let tenantDefaulted = instance.TenantDefaulted();
+	    let tenantDefaulted = instance.TenantStateChanged();
 	    tenantDefaulted.watch((error, result) => {
-		assert.equal("TenantDefaulted", result.event);
+		assert.equal("TenantStateChanged", result.event);
 		assert.ok("tenantBalance" in result.args);
 		assert.equal(-3*finney, result.args.tenantBalance);
 	    });
