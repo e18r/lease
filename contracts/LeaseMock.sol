@@ -7,7 +7,7 @@ contract LeaseMock is Lease {
 
   uint time;
 
-  function LeaseMock(
+  constructor(
 		     address _owner,
 		     address _tenant,
 		     uint _start,

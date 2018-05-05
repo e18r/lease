@@ -19,7 +19,7 @@ contract Lease {
   event TerminationNotice(uint actualEnd);
   event Terminated();
 
-  function Lease(
+  constructor(
 		address _owner,
 		address _tenant,
 		uint _start,
