@@ -47,7 +47,7 @@ contract("Logic", async (accounts) => {
 
 });
 
-contract.skip("Lease", async (accounts) => {
+contract("Lease", async (accounts) => {
     
     it("constructor", async () => {
 	let owner = accounts[OWNER];
@@ -66,7 +66,7 @@ contract.skip("Lease", async (accounts) => {
     it("fallback", async () => {
 	let instance = await Lease.deployed();
     	txGas.apply(this, [accounts[TENANT], instance.address, 10]);
-	await instance.mockWithdrawal();
+	await instance.mockZeroBalance();
     });
     
     it("openDoor()", async () => {
@@ -94,7 +94,7 @@ contract.skip("Lease", async (accounts) => {
 	await instance.mockEnd(now + 2*months);
 	await instance.mockTime(now + 4*months);
 	await fnGas.apply(this, [accounts[TENANT], instance.withdrawRemainder]);
-	await instance.mockWithdrawal();
+	await instance.mockZeroBalance();
     });
     
     it("updateTenantState()", async () => {

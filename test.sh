@@ -9,7 +9,7 @@ else
     ganache-cli -p 8875 &> /dev/null &
 fi
 
-truffle test --network dev
+truffle test --network development
 
 if $own; then
     echo "killing ganache-cli..."

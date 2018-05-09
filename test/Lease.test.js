@@ -827,48 +827,12 @@ contract("Lease", async (accounts) => {
 
 	it("should update the state if it changed", async () => {
 	    let instance = await Lease.deployed();
-	    let logic = await Logic.deployed();
-
-	    let fee = 1000;
-	    let deposit = 2000;
-	    let end = 0;
-	    let start = await instance.start();
-	    let now = start.sub(15*24*60*60);
-	    let month = await logic.getMonth(now, start, end);	    
-	    let withdrawn = 0;
-	    
-	    console.log("instance.tenantState: " + (await instance.tenantState()).toNumber());
 	    let tx = {from:accounts[TENANT], to:instance.address,
 		      value:2*finney, gasPrice:gasPrice};
 	    await web3.eth.sendTransaction(tx);
-	    console.log("payment made.");
-	    
-	    let balance = await web3.eth.getBalance(instance.address);
-	    console.log("balance: " + balance);
-	    
-	    let tenantBalance = await logic.getTenantBalance(balance, fee, deposit, withdrawn, month);
-	    let ts = await logic.getTenantState(fee, deposit, month, tenantBalance);
-	    console.log("logic.tenantState: " + ts.toNumber());
 	    assert.notEqual(ONTIME, await instance.tenantState());
-	    console.log("instance.tenantState: " + (await instance.tenantState()).toNumber());
-	    let tenantStateChanged = instance.TenantStateChanged();
-	    tenantStateChanged.watch(async (error, result) => {
-		balance = web3.eth.getBalance(instance.address);
-		console.log("balance: " + balance);
-		tenantBalance = await logic.getTenantBalance(balance, fee, deposit, withdrawn, month);
-		ts = await logic.getTenantState(fee, deposit, month, tenantBalance);
-		console.log("logic.tenantState: " + ts.toNumber());
-		console.log("TenantStateChanged:");
-		console.log("--tenantState: " + result.args.stateNumber.toNumber());
-		console.log("--tenantBalance: " + result.args.tenantBalance.toNumber());
-	    });
-	    ts = await logic.getTenantState(fee, deposit, month, tenantBalance);
-	    console.log("logic.tenantState: " + ts.toNumber());
 	    await instance.updateTenantState({from:accounts[OWNER],
 					      gasPrice:gasPrice});
-	    tenantStateChanged.stopWatching();
-	    console.log("instance.updateTenantState().");
-	    console.log("instance.tenantState: " + (await instance.tenantState()).toNumber());
 	    let obtained = await instance.tenantState();
 	    assert.equal(ONTIME, obtained.toNumber());
 	});
