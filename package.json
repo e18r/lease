@@ -1,0 +1,42 @@
+{
+  "name": "lease",
+  "version": "1.0.0",
+  "description": "An Ethereum Lease Contract for real estate",
+  "main": "truffle.js",
+  "private": true,
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "compile": "truffle compile",
+    "deploy": "truffle migrate",
+    "test": "scripts/test.sh",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emi-silva/lease.git"
+  },
+  "keywords": [
+    "ethereum",
+    "web3",
+    "lease"
+  ],
+  "author": "Emilio Silva <emilioss@gmail.com>",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/emi-silva/lease/issues"
+  },
+  "homepage": "https://github.com/emi-silva/lease#readme",
+  "devDependencies": {
+    "clean-webpack-plugin": "^0.1.19",
+    "html-webpack-plugin": "^3.2.0",
+    "truffle": "^4.1.9",
+    "webpack": "^4.8.3",
+    "webpack-command": "^0.2.0"
+  },
+  "dependencies": {
+    "solc": "^0.4.24",
+    "web3": "^1.0.0-beta.34"
+  }
+}
