@@ -4,19 +4,19 @@ let LeaseMock = artifacts.require("./LeaseMock.sol");
 
 module.exports = (deployer) => {
 
-    let owner = web3.eth.accounts[1];
-    let tenant = web3.eth.accounts[2];
-    let startDate = Math.round(Date.now() / 1000) + 15*24*60*60;
-    let fee = 1000;
-    let deposit = 2000;
-    let gasPrice = 10000000000;
-    
-    deployer.deploy(Logic, {gasPrice:gasPrice});
-    deployer.link(Logic, [Lease, LeaseMock]);
-    
-    deployer.deploy(Lease, owner, tenant, startDate, fee, deposit,
-		    {from:owner, gasPrice:gasPrice});
-    deployer.deploy(LeaseMock, owner, tenant, startDate, fee, deposit,
-		    {from:owner, gasPrice:gasPrice});
+  let owner = web3.eth.accounts[1];
+  let tenant = web3.eth.accounts[2];
+  let startDate = Math.round(Date.now() / 1000) + 15*24*60*60;
+  let fee = 1000;
+  let deposit = 2000;
+  let gasPrice = 10000000000;
+  
+  deployer.deploy(Logic, {gasPrice:gasPrice});
+  deployer.link(Logic, [Lease, LeaseMock]);
+  
+  deployer.deploy(Lease, owner, tenant, startDate, fee, deposit,
+		  {from:owner, gasPrice:gasPrice});
+  deployer.deploy(LeaseMock, owner, tenant, startDate, fee, deposit,
+		  {from:owner, gasPrice:gasPrice});
 
 };
