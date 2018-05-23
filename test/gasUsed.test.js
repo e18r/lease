@@ -55,7 +55,7 @@ contract("Lease", async (accounts) => {
     let start = now + 15*days;
     let fee = 1;
     let deposit = 2;
-    await fnGas.apply(this, [owner, Lease.new, owner, tenant,
+    await fnGas.apply(this, [owner, Lease.new, tenant,
 			     start, fee, deposit]);
   });
 

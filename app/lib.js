@@ -16,7 +16,7 @@ async function deploy(web3, owner, tenant, startDate, fee, deposit) {
   });
   let lease = await Lease.deploy({
     data: linkedBytecode,
-    arguments: [owner, tenant, startDate, fee, deposit]
+    arguments: [tenant, startDate, fee, deposit]
   }).send({
     from: owner,
     gasLimit: 2000000

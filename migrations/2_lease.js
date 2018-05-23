@@ -14,9 +14,9 @@ module.exports = (deployer) => {
   deployer.deploy(Logic, {gasPrice:gasPrice});
   deployer.link(Logic, [Lease, LeaseMock]);
   
-  deployer.deploy(Lease, owner, tenant, startDate, fee, deposit,
+  deployer.deploy(Lease, tenant, startDate, fee, deposit,
 		  {from:owner, gasPrice:gasPrice});
-  deployer.deploy(LeaseMock, owner, tenant, startDate, fee, deposit,
+  deployer.deploy(LeaseMock, tenant, startDate, fee, deposit,
 		  {from:owner, gasPrice:gasPrice});
 
 };

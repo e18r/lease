@@ -20,19 +20,17 @@ contract Lease {
   event Terminated();
 
   constructor(
-		address _owner,
 		address _tenant,
 		uint _start,
 		uint _fee,
 		uint _deposit)
     public {
-    require(_owner != address(0) && _tenant != address(0));
-    require(msg.sender == _owner || msg.sender == _tenant);
-    require(_owner != _tenant);
+    require(_tenant != address(0));
+    require(msg.sender != _tenant);
     require(now < _start);
     require(_fee > 0);
     require(_deposit >= _fee * 2);
-    owner = _owner;
+    owner = msg.sender;
     tenant = _tenant;
     start = _start;
     fee = _fee;
