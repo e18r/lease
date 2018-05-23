@@ -23,8 +23,7 @@ async function fnGas(from, fn) {
 
 function txGas(from, to, value) {
   let balance0 = web3.eth.getBalance(from);
-  web3.eth.sendTransaction({from:from, to:to, value:value,
-			    gasPrice:gasPrice});
+  web3.eth.sendTransaction({from:from, to:to, value:value, gasPrice:gasPrice});
   let balance1 = web3.eth.getBalance(from);
   let txFee = balance0 - balance1 + value;
   let gasUsed = Math.round(txFee / gasPrice);
@@ -55,8 +54,7 @@ contract("Lease", async (accounts) => {
     let start = now + 15*days;
     let fee = 1;
     let deposit = 2;
-    await fnGas.apply(this, [owner, Lease.new, tenant,
-			     start, fee, deposit]);
+    await fnGas.apply(this, [owner, Lease.new, tenant, start, fee, deposit]);
   });
 
   it("singleton", async () => {

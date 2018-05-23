@@ -19,12 +19,7 @@ contract Lease {
   event TerminationNotice(uint actualEnd);
   event Terminated();
 
-  constructor(
-		address _tenant,
-		uint _start,
-		uint _fee,
-		uint _deposit)
-    public {
+  constructor(address _tenant, uint _start, uint _fee, uint _deposit) public {
     require(_tenant != address(0));
     require(msg.sender != _tenant);
     require(now < _start);
@@ -62,8 +57,8 @@ contract Lease {
     require(msg.sender == owner);
     uint month = Logic.getMonth(getTime(), start, end);
     uint withdrawable = Logic.getWithdrawable(address(this).balance, fee,
-					       uint(tenantState), withdrawn,
-					       month);
+					      uint(tenantState), withdrawn,
+					      month);
     withdrawn += withdrawable;
     owner.transfer(withdrawable);
   }
@@ -94,8 +89,8 @@ contract Lease {
     require(getTime() >= end + 30 days);
     uint month = Logic.getMonth(getTime(), start, end);
     uint withdrawable = Logic.getWithdrawable(address(this).balance, fee,
-    					       uint(tenantState), withdrawn,
-    					       month);
+					      uint(tenantState), withdrawn,
+					      month);
     uint remainder = Logic.getRemainder(address(this).balance, withdrawable);
     require(remainder > 0);
     tenant.transfer(remainder);
@@ -104,7 +99,7 @@ contract Lease {
   function updateTenantState() external {
     uint month = Logic.getMonth(getTime(), start, end);
     int tenantBalance = Logic.getTenantBalance(address(this).balance, fee,
-    						deposit, withdrawn, month);
+					       deposit, withdrawn, month);
     uint stateNumber = Logic.getTenantState(fee, deposit, month, tenantBalance);
     tenantState = Logic.State(stateNumber);
     emit TenantStateChanged(stateNumber, tenantBalance);

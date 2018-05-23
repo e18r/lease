@@ -7,12 +7,8 @@ contract LeaseMock is Lease {
 
   uint time;
 
-  constructor(
-		     address _tenant,
-		     uint _start,
-		     uint _fee,
-		     uint _deposit)
-    public Lease(_tenant, _start, _fee, _deposit) {}
+  constructor(address _tenant, uint _start, uint _fee, uint _deposit) public
+    Lease(_tenant, _start, _fee, _deposit) {}
 
   function mockTime(uint _time) public {
     time = _time;

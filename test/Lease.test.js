@@ -13,7 +13,6 @@ const BELATED = helper.BELATED;
 const DEFAULTED = helper.DEFAULTED;
 
 const Lease = artifacts.require("./LeaseMock.sol");
-
 const Logic = artifacts.require("./Logic.sol");
 
 async function newLease(accounts) {
@@ -139,8 +138,8 @@ contract("Lease", async (accounts) => {
       let instance = await Lease.deployed();
       let balance0 = web3.eth.getBalance(instance.address).toNumber();
       let amount = 1*finney;
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:amount, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:amount,
+		gasPrice:gasPrice};
       web3.eth.sendTransaction(tx);
       let balance1 = web3.eth.getBalance(instance.address).toNumber();
       let balance = balance1 - balance0;
@@ -149,8 +148,8 @@ contract("Lease", async (accounts) => {
 
     it("should disallow payments not coming from the tenant", async () => {
       let instance = await Lease.deployed();
-      let tx = {from:accounts[ROBBER], to:instance.address,
-		value:1*finney, gasPrice:gasPrice};
+      let tx = {from:accounts[ROBBER], to:instance.address, value:1*finney,
+		gasPrice:gasPrice};
       assert.throws(
 	() => {
 	  web3.eth.sendTransaction(tx);
@@ -161,8 +160,8 @@ contract("Lease", async (accounts) => {
 
     it("should disallow payments from the owner", async () => {
       let instance = await Lease.deployed();
-      let tx = {from:accounts[OWNER], to:instance.address,
-		value:1*finney, gasPrice:gasPrice};
+      let tx = {from:accounts[OWNER], to:instance.address, value:1*finney,
+		gasPrice:gasPrice};
       assert.throws(
 	() => {
 	  web3.eth.sendTransaction(tx);
@@ -174,8 +173,8 @@ contract("Lease", async (accounts) => {
     it("should disallow payments if the tenant defaulted", async () => {
       let instance = await Lease.deployed();
       await instance.mockTenantState(DEFAULTED, {gasPrice:gasPrice});
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:1*finney, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:1*finney,
+		gasPrice:gasPrice};
       assert.throws(
 	() => {
 	  web3.eth.sendTransaction(tx);
@@ -201,8 +200,8 @@ contract("Lease", async (accounts) => {
       let instance = await Lease.deployed();
       await instance.mockTime(now + 3*months, {gasPrice:gasPrice});
       await instance.mockEnd(now + 2.5*months, {gasPrice:gasPrice});
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:1*finney, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:1*finney,
+		gasPrice:gasPrice};
       assert.throws(
 	() => {
 	  web3.eth.sendTransaction(tx);
@@ -322,8 +321,7 @@ contract("Lease", async (accounts) => {
       let instance = await Lease.deployed();
       await assertThrowsAsync(
 	async () => {
-	  await instance.withdraw({from:accounts[TENANT],
-				   gasPrice:gasPrice});
+	  await instance.withdraw({from:accounts[TENANT], gasPrice:gasPrice});
 	},
 	  /revert/
       );
@@ -348,8 +346,7 @@ contract("Lease", async (accounts) => {
     it("should allow the owner to withdraw her first rent", async () => {
       let instance = await Lease.deployed();
       await instance.mockTime(now + 1*months, {gasPrice:gasPrice});
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:3*finney};
+      let tx = {from:accounts[TENANT], to:instance.address, value:3*finney};
       web3.eth.sendTransaction(tx);
       let balance0 = web3.eth.getBalance(accounts[OWNER]);
       let result = await instance.withdraw({from:accounts[OWNER],
@@ -365,8 +362,7 @@ contract("Lease", async (accounts) => {
     it("the owner can't withdraw rent paid for in advance", async () => {
       let instance = await Lease.deployed();
       await instance.mockTime(now + 1*months, {gasPrice:gasPrice});
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:4*finney};
+      let tx = {from:accounts[TENANT], to:instance.address, value:4*finney};
       web3.eth.sendTransaction(tx);
       let balance0 = web3.eth.getBalance(accounts[OWNER]);
       let result = await instance.withdraw({from:accounts[OWNER],
@@ -382,8 +378,7 @@ contract("Lease", async (accounts) => {
     it("the owner can't withdraw more than once a month", async () => {
       let instance = await Lease.deployed();
       await instance.mockTime(now + 1*months, {gasPrice:gasPrice});
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:4*finney};
+      let tx = {from:accounts[TENANT], to:instance.address, value:4*finney};
       web3.eth.sendTransaction(tx);
       await instance.withdraw({from:accounts[OWNER], gasPrice:gasPrice});
       let balance0 = web3.eth.getBalance(accounts[OWNER]);
@@ -400,8 +395,7 @@ contract("Lease", async (accounts) => {
     it("if the tenant is belated, use some of the deposit", async () => {
       let instance = await Lease.deployed();
       await instance.mockTime(now + 2*months, {gasPrice:gasPrice});
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:3*finney};
+      let tx = {from:accounts[TENANT], to:instance.address, value:3*finney};
       web3.eth.sendTransaction(tx);
       let balance0 = web3.eth.getBalance(accounts[OWNER]);
       let result = await instance.withdraw({from:accounts[OWNER],
@@ -417,8 +411,7 @@ contract("Lease", async (accounts) => {
     it("if the tenant has defaulted, use all the deposit", async () => {
       let instance = await Lease.deployed();
       await instance.mockTime(now + 3*months, {gasPrice:gasPrice});
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:3*finney};
+      let tx = {from:accounts[TENANT], to:instance.address, value:3*finney};
       web3.eth.sendTransaction(tx);
       let balance0 = web3.eth.getBalance(accounts[OWNER]);
       let result = await instance.withdraw({from:accounts[OWNER],
@@ -441,9 +434,8 @@ contract("Lease", async (accounts) => {
       let earlyEnd = start + 2.5*months;
       await assertThrowsAsync(
 	async () => {
-	  await instance.notifyTermination(earlyEnd, 
-					   {from:accounts[OWNER],
-					    gasPrice:gasPrice});
+	  await instance.notifyTermination(earlyEnd, {from:accounts[OWNER],
+						      gasPrice:gasPrice});
 	},
 	  /revert/
       );
@@ -498,9 +490,8 @@ contract("Lease", async (accounts) => {
       let earlyEnd = start.add(2*months).add(15*days);
       await assertThrowsAsync(
 	async () => {
-	  await instance.notifyTermination(earlyEnd,
-					   {from:accounts[ROBBER],
-					    gasPrice:gasPrice});
+	  await instance.notifyTermination(earlyEnd, {from:accounts[ROBBER],
+						      gasPrice:gasPrice});
 	},
 	  /revert/
       );
@@ -511,9 +502,8 @@ contract("Lease", async (accounts) => {
       let start = await instance.start();
       await instance.mockTime(start.add(15*days), {gasPrice:gasPrice});
       let earlyEnd = start.add(2*months).add(15*days);
-      await instance.notifyTermination(earlyEnd,
-				       {from:accounts[TENANT],
-					gasPrice:gasPrice});
+      await instance.notifyTermination(earlyEnd, {from:accounts[TENANT],
+						  gasPrice:gasPrice});
       await assertThrowsAsync(
 	async () => {
 	  await instance.notifyTermination(earlyEnd + 1*months,
@@ -532,9 +522,8 @@ contract("Lease", async (accounts) => {
       let actualEnd = earlyEnd;
       await assertThrowsAsync(
 	async () => {
-	  await instance.notifyTermination(earlyEnd,
-					   {from:accounts[OWNER],
-					    gasPrice:gasPrice});
+	  await instance.notifyTermination(earlyEnd, {from:accounts[OWNER],
+						      gasPrice:gasPrice});
 	},
 	  /revert/
       );
@@ -574,8 +563,7 @@ contract("Lease", async (accounts) => {
       let instance = await newLease(accounts);
       await instance.mockEnd(now + 2.5*months, {gasPrice:gasPrice});
       await instance.mockTime(now + 3*months, {gasPrice:gasPrice});
-      await instance.terminate({from:accounts[TENANT],
-				gasPrice:gasPrice});
+      await instance.terminate({from:accounts[TENANT], gasPrice:gasPrice});
       await assertThrowsAsync(
 	async () => {
 	  await instance.getTime({gasPrice:gasPrice});
@@ -590,8 +578,7 @@ contract("Lease", async (accounts) => {
       await instance.mockTime(now + 3*months, {gasPrice:gasPrice});
       await assertThrowsAsync(
 	async () => {
-	  await instance.terminate({from:accounts[ROBBER],
-				    gasPrice:gasPrice});
+	  await instance.terminate({from:accounts[ROBBER], gasPrice:gasPrice});
 	},
 	  /revert/
       );
@@ -601,8 +588,7 @@ contract("Lease", async (accounts) => {
       let instance = await newLease(accounts);
       await assertThrowsAsync(
 	async () => {
-	  await instance.terminate({from:accounts[OWNER],
-				    gasPrice:gasPrice});
+	  await instance.terminate({from:accounts[OWNER], gasPrice:gasPrice});
 	},
 	  /revert/
       );
@@ -611,12 +597,10 @@ contract("Lease", async (accounts) => {
     it("cannot be called if the end date is in the future", async () => {
       let instance = await newLease(accounts);
       await instance.mockTime(now + 2*months, {gasPrice:gasPrice});
-      await instance.mockEnd(now + 2*months + 1*days,
-			     {gasPrice:gasPrice});
+      await instance.mockEnd(now + 2*months + 1*days, {gasPrice:gasPrice});
       await assertThrowsAsync(
 	async () => {
-	  await instance.terminate({from:accounts[OWNER],
-				    gasPrice:gasPrice});
+	  await instance.terminate({from:accounts[OWNER], gasPrice:gasPrice});
 	},
 	  /revert/
       );
@@ -630,8 +614,7 @@ contract("Lease", async (accounts) => {
       await instance.mockTime(now + 3*months, {gasPrice:gasPrice});
       await assertThrowsAsync(
 	async () => {
-	  await instance.terminate({from:accounts[OWNER],
-				    gasPrice:gasPrice});
+	  await instance.terminate({from:accounts[OWNER], gasPrice:gasPrice});
 	},
 	  /revert/
       );
@@ -657,14 +640,14 @@ contract("Lease", async (accounts) => {
       let instance = await Lease.deployed();
       let deposit = 2*finney;
       let fees = 2*finney;
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:deposit+fees, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:deposit+fees,
+		gasPrice:gasPrice};
       web3.eth.sendTransaction(tx);
       await instance.mockEnd(now + 2.5*months, {gasPrice:gasPrice});
       await instance.mockTime(now + 4*months, {gasPrice:gasPrice});
       let balance0 = web3.eth.getBalance(accounts[TENANT]);
-      let result = await instance.withdrawRemainder(
-	{from:accounts[TENANT], gasPrice:gasPrice});
+      let result = await instance.withdrawRemainder({from:accounts[TENANT],
+						     gasPrice:gasPrice});
       let balance1 = web3.eth.getBalance(accounts[TENANT]);
       let balance = balance1.sub(balance0);
       let gasUsed = result.receipt.gasUsed;
@@ -677,8 +660,8 @@ contract("Lease", async (accounts) => {
       let instance = await Lease.deployed();
       let deposit = 2*finney;
       let fees = 2*finney;
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:deposit+fees, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:deposit+fees,
+		gasPrice:gasPrice};
       web3.eth.sendTransaction(tx);
       await instance.mockEnd(now + 2.5*months, {gasPrice:gasPrice});
       await instance.mockTime(now + 4*months, {gasPrice:gasPrice});
@@ -695,8 +678,8 @@ contract("Lease", async (accounts) => {
       let instance = await Lease.deployed();
       let deposit = 2*finney;
       let fees = 2*finney;
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:deposit+fees, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:deposit+fees,
+		gasPrice:gasPrice};
       web3.eth.sendTransaction(tx);
       await instance.mockEnd(now + 2.5*months, {gasPrice:gasPrice});
       await instance.mockTime(now + 4*months, {gasPrice:gasPrice});
@@ -713,8 +696,8 @@ contract("Lease", async (accounts) => {
       let instance = await Lease.deployed();
       let deposit = 2*finney;
       let fees = 2*finney;
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:deposit+fees, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:deposit+fees,
+		gasPrice:gasPrice};
       web3.eth.sendTransaction(tx);
       await instance.mockEnd(0, {gasPrice:gasPrice});
       await instance.mockTime(now + 4*months, {gasPrice:gasPrice});
@@ -731,8 +714,8 @@ contract("Lease", async (accounts) => {
       let instance = await Lease.deployed();
       let deposit = 2*finney;
       let fees = 2*finney;
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:deposit+fees, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:deposit+fees,
+		gasPrice:gasPrice};
       web3.eth.sendTransaction(tx);
       await instance.mockTime(now + 4*months, {gasPrice:gasPrice});
       await instance.mockEnd(now + 4.1*months, {gasPrice:gasPrice});
@@ -749,8 +732,8 @@ contract("Lease", async (accounts) => {
       let instance = await Lease.deployed();
       let deposit = 2*finney;
       let fees = 2*finney;
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:deposit+fees, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:deposit+fees,
+		gasPrice:gasPrice};
       web3.eth.sendTransaction(tx);
       await instance.mockEnd(now + 3*months, {gasPrice:gasPrice});
       await instance.mockTime(now + 4*months - 1, {gasPrice:gasPrice});
@@ -767,8 +750,8 @@ contract("Lease", async (accounts) => {
       let instance = await Lease.deployed();
       let deposit = 2*finney;
       let fees = 2*finney;
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:deposit+fees, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:deposit+fees,
+		gasPrice:gasPrice};
       web3.eth.sendTransaction(tx);
       let start = await instance.start();
       await instance.mockEnd(start.add(2*months).add(15*days),
@@ -805,8 +788,8 @@ contract("Lease", async (accounts) => {
 
     it("should update the state if it changed", async () => {
       let instance = await Lease.deployed();
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:2*finney, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:2*finney,
+		gasPrice:gasPrice};
       await web3.eth.sendTransaction(tx);
       assert.notEqual(ONTIME, await instance.tenantState());
       await instance.updateTenantState({from:accounts[OWNER],
@@ -817,8 +800,8 @@ contract("Lease", async (accounts) => {
 
     it("can be called by anyone", async () => {
       let instance = await Lease.deployed();
-      let tx = {from:accounts[TENANT], to:instance.address,
-		value:2*finney, gasPrice:gasPrice};
+      let tx = {from:accounts[TENANT], to:instance.address, value:2*finney,
+		gasPrice:gasPrice};
       web3.eth.sendTransaction(tx);
       assert.notEqual(ONTIME, await instance.tenantState());
       await instance.updateTenantState({from:accounts[ROBBER],

@@ -21,8 +21,8 @@ contract("Logic", async (accounts) => {
       let withdrawn = 2*ether;
       let month = 3;
       let withdrawable = await instance.getWithdrawable(balance, fee,
-							tenantState,
-							withdrawn, month);
+							tenantState, withdrawn,
+							month);
       assert.equal(withdrawable, 10*ether);
     });
 
@@ -34,8 +34,8 @@ contract("Logic", async (accounts) => {
       let withdrawn = 0*ether;
       let month = 3;
       let withdrawable = await instance.getWithdrawable(balance, fee,
-							tenantState,
-							withdrawn, month);
+							tenantState, withdrawn,
+							month);
       assert.equal(withdrawable, 6*ether);
     });
 
@@ -47,8 +47,8 @@ contract("Logic", async (accounts) => {
       let withdrawn = 1*ether;
       let month = 3;
       let withdrawable = await instance.getWithdrawable(balance, fee,
-							tenantState,
-							withdrawn, month);
+							tenantState, withdrawn,
+							month);
       assert.equal(withdrawable, 5*ether);
     });
 
@@ -111,10 +111,8 @@ contract("Logic", async (accounts) => {
       let deposit = 4*ether;
       let withdrawn = 1*ether;
       let month = 2;
-      let tenantBalance = await instance.getTenantBalance(balance, fee,
-							  deposit,
-							  withdrawn,
-							  month);
+      let tenantBalance = await instance.getTenantBalance(balance, fee, deposit,
+							  withdrawn, month);
       assert.equal(tenantBalance, 2*ether);
     });
 
@@ -125,10 +123,8 @@ contract("Logic", async (accounts) => {
       let deposit = 4*ether;
       let withdrawn = 1*ether;
       let month = 2;
-      let tenantBalance = await instance.getTenantBalance(balance, fee,
-							  deposit,
-							  withdrawn,
-							  month);
+      let tenantBalance = await instance.getTenantBalance(balance, fee, deposit,
+							  withdrawn, month);
       assert.equal(tenantBalance, -2*ether);
     });
     

@@ -4,8 +4,7 @@ library Logic {
 
   enum State { onTime, belated, defaulted }
 
-  function getWithdrawable(
-			   uint _balance,
+  function getWithdrawable(uint _balance,
 			   uint _fee,
 			   uint _tenantState,
 			   uint _withdrawn,
@@ -19,8 +18,7 @@ library Logic {
     }
   }
 
-  function getTenantState(
-			  uint _fee,
+  function getTenantState(uint _fee,
 			  uint _deposit,
 			  uint _month,
 			  int _tenantBalance)
@@ -36,8 +34,7 @@ library Logic {
     }
   }
 
-  function getTenantBalance(
-			    uint _balance,
+  function getTenantBalance(uint _balance,
 			    uint _fee,
 			    uint _deposit,
 			    uint _withdrawn,
