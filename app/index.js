@@ -12,7 +12,7 @@ function insertInput(type, name) {
     if((type == "address" && web3.utils.isAddress(input.value))
 	|| (type == "date" && moment(input.value).isValid())
 	|| (type == "amount" && !Object.is(+input.value, NaN))) {
-	input.style.border = "1px solid #00FF00";
+	input.style.border = "1px solid #00AA00";
     }
     else {
       input.style.border = "1px solid red";
@@ -59,7 +59,7 @@ async function deployContract() {
     depositInput.setAttribute("disabled", true);
     deployButton.setAttribute("disabled", true);
     deployButton.innerHTML = "Lease contract created";
-    resultNotice.style.border = "1px solid #00FF00";
+    resultNotice.style.border = "1px solid #00AA00";
     resultNotice.innerHTML = instance._address;
   }
   catch(error) {
