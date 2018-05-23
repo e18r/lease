@@ -398,7 +398,7 @@ contract("Lease", async (accounts) => {
     });
 
     it("if the tenant is belated, use some of the deposit", async () => {
-      let instance = await newLease(accounts);
+      let instance = await Lease.deployed();
       await instance.mockTime(now + 2*months, {gasPrice:gasPrice});
       let tx = {from:accounts[TENANT], to:instance.address,
 		value:3*finney};
@@ -415,7 +415,7 @@ contract("Lease", async (accounts) => {
     });
 
     it("if the tenant has defaulted, use all the deposit", async () => {
-      let instance = await newLease(accounts);
+      let instance = await Lease.deployed();
       await instance.mockTime(now + 3*months, {gasPrice:gasPrice});
       let tx = {from:accounts[TENANT], to:instance.address,
 		value:3*finney};
