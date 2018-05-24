@@ -10,8 +10,8 @@ function insertInput(type, name) {
   input.style.border = "1px solid black";
   input.onchange = () => {
     if((type == "address" && web3.utils.isAddress(input.value))
-	|| (type == "date" && moment(input.value).isValid())
-	|| (type == "amount" && !Object.is(+input.value, NaN))) {
+       || (type == "date" && moment(input.value).isValid())
+       || (type == "amount" && !Object.is(+input.value, NaN))) {
 	input.style.border = "1px solid #00AA00";
     }
     else {
@@ -24,7 +24,7 @@ function insertInput(type, name) {
   }
   else if(type == "date") {
     label.innerHTML += " date";
-    input.setAttribute("size", 10);
+    input.setAttribute("size", 15);
   }
   else if(type == "amount") {
     label.innerHTML += " amount";
@@ -39,32 +39,72 @@ function insertInput(type, name) {
   document.body.appendChild(document.createElement("br"));
 }
 
-async function deployContract() {
-  try {
-    let ownerInput = document.getElementById("owner");
-    let tenantInput = document.getElementById("tenant");
-    let startInput = document.getElementById("start");
-    let feeInput = document.getElementById("fee");
-    let depositInput = document.getElementById("deposit");
-    let owner = ownerInput.value;
-    let tenant = tenantInput.value;
-    let startDate = moment(start.value).format("X");
-    let fee = web3.utils.toWei(feeInput.value, "ether");
-    let deposit = web3.utils.toWei(depositInput.value, "ether");
-    let instance = await deploy(web3, owner, tenant, startDate, fee, deposit)
-    ownerInput.setAttribute("disabled", true);
-    tenantInput.setAttribute("disabled", true);
-    startInput.setAttribute("disabled", true);
-    feeInput.setAttribute("disabled", true);
-    depositInput.setAttribute("disabled", true);
-    deployButton.setAttribute("disabled", true);
-    deployButton.innerHTML = "Lease contract created";
+function get(type, name) {
+  let input = document.getElementById(name);
+  if(type == "address") {
+    return input.value;
+  }
+  if(type == "date") {
+    return moment(input.value).format("X");
+  }
+  if(type == "amount") {
+    try {
+      return web3.utils.toWei(input.value, "ether");
+    }
+    catch(error) {
+      throw name + ": " + error
+    }
+  }
+}
+
+function set(type, name, value) {
+  let input = document.getElementById(name);
+  input.setAttribute("disabled", true);
+  if(type == "address") {
+    input.value = value;
+  }
+  else if(type == "date") {
+    input.value = moment(value, "X").format("MMMM Do Y");
+  }
+  else if(type == "amount") {
+    input.value = web3.utils.fromWei(value, "ether");
+  }
+}
+
+function setResult(type, data) {
+  resultNotice.innerHTML = "";
+  if(type == "success") {
     resultNotice.style.border = "1px solid #00AA00";
-    resultNotice.innerHTML = instance._address;
+  }
+  else if(type == "failure") {
+    resultNotice.style.border = "1px solid red";
+  }
+  data.forEach((datum) => {
+    resultNotice.insertAdjacentText("beforeend", datum);
+    resultNotice.appendChild(document.createElement("br"));
+  });
+}
+
+async function submitContract() {
+  try {
+    let owner = await web3.eth.getCoinbase();    
+    let tenant = get("address", "tenant");
+    let start = get("date", "start");
+    let fee = get("amount", "fee");
+    let deposit = get("amount", "deposit");
+    let lease = await deploy(web3, owner, tenant, start, fee, deposit)
+    set("address", "tenant", await (await lease.methods.tenant()).call());
+    set("date", "start", await (await lease.methods.start()).call());
+    set("amount", "fee", await (await lease.methods.fee()).call());
+    set("amount", "deposit", await (await lease.methods.deposit()).call());
+    submitButton.setAttribute("disabled", true);
+    setResult("success", [
+      "contract address: " +lease._address,
+      "owner's address: " + await (await lease.methods.owner()).call()
+    ]);
   }
   catch(error) {
-    resultNotice.style.border = "1px solid red";
-    resultNotice.innerHTML = error;
+    setResult("failure", [error])
   }
 }
 
@@ -72,16 +112,15 @@ let web3 = new Web3();
 let provider = new web3.providers.HttpProvider("http://127.0.0.1:8875");
 web3.setProvider(provider);
 
-insertInput("address", "owner");
 insertInput("address", "tenant");
 insertInput("date", "start");
 insertInput("amount", "fee");
 insertInput("amount", "deposit");
 
-let deployButton = document.createElement("button");
-deployButton.innerHTML = "create Lease contract";
-deployButton.onclick = deployContract;
-document.body.appendChild(deployButton);
+let submitButton = document.createElement("button");
+submitButton.innerHTML = "create lease contract";
+submitButton.onclick = submitContract;
+document.body.appendChild(submitButton);
 
 let resultNotice = document.createElement("div");
 document.body.appendChild(resultNotice);
