@@ -1,7 +1,18 @@
+import Web3 from "web3";
 import logicJSON from "../build/contracts/Logic.json";
 import leaseJSON from "../build/contracts/Lease.json";
 import linker from "solc/linker";
 import moment from "moment";
+
+let web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:8875");
+let state = {
+  0: "on time",
+  1: "belated",
+  2: "defaulted",
+  "on time": 0,
+  "belated": 1,
+  "defaulted": 2
+};
 
 function insertInput(web3, canvas, type, name, disabled) {
   let label = document.createElement("label");
@@ -15,7 +26,8 @@ function insertInput(web3, canvas, type, name, disabled) {
   input.onchange = () => {
     if((type == "address" && web3.utils.isAddress(input.value))
        || (type == "date" && moment(input.value).isValid())
-       || (type == "amount" && !Object.is(+input.value, NaN))) {
+       || (type == "amount" && !Object.is(+input.value, NaN))
+       || (type == "state" && Object.values(state).includes(input.value))) {
 	input.style.border = "1px solid #00AA00";
     }
     else {
@@ -34,6 +46,9 @@ function insertInput(web3, canvas, type, name, disabled) {
     label.innerHTML += " amount";
     input.setAttribute("size", 20);
   }
+  else if(type == "state") {
+    input.setAttribute("size", 7);
+  }
   label.innerHTML += ": ";
   label.appendChild(input);
   if(type == "amount") {
@@ -41,6 +56,60 @@ function insertInput(web3, canvas, type, name, disabled) {
   }
   canvas.appendChild(label);
   canvas.appendChild(document.createElement("br"));
+}
+
+function get(type, canvas, name) {
+  let input = document.getElementById(canvas + " " + name);
+  if(type == "address") {
+    return input.value;
+  }
+  if(type == "date") {
+    return moment(input.value).format("X");
+  }
+  if(type == "amount") {
+    try {
+      return web3.utils.toWei(input.value, "ether");
+    }
+    catch(error) {
+      throw name + ": " + error
+    }
+  }
+  if(type == "state") {
+    return state[input.value];
+  }
+}
+
+function set(type, canvas, name, value) {
+  let input = document.getElementById(canvas + " " + name);
+  if(type == "address") {
+    input.value = value;
+  }
+  else if(type == "date") {
+    if(value == 0) {
+      input.value = "not set";
+    }
+    else {
+      input.value = moment(value, "X").format("ddd, DD MMM YYYY");
+    }
+  }
+  else if(type == "amount") {
+    input.value = web3.utils.fromWei(value, "ether");
+  }
+  else if(type == "state") {
+    input.value = state[value];
+  }
+}
+
+function setResult(type, canvas, message) {
+  let resultCanvas = document.getElementById(canvas + " result");
+  resultCanvas.innerHTML = "";
+  if(type == "success") {
+    resultCanvas.style.border = "1px solid #00AA00";
+  }
+  else if(type == "failure") {
+    resultCanvas.style.border = "1px solid red";
+  }
+  resultCanvas.insertAdjacentText("beforeend", message);
 }
 
 async function deploy(web3, owner, tenant, startDate, fee, deposit) {
@@ -65,4 +134,8 @@ async function deploy(web3, owner, tenant, startDate, fee, deposit) {
   return lease;
 }
 
-export { insertInput, deploy };
+function fetch(address) {
+  return new web3.eth.Contract(leaseJSON.abi, address);
+}
+
+export { insertInput, get, set, setResult, deploy, fetch };
