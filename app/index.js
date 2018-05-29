@@ -3,6 +3,20 @@ import { addrSelect, insertInput, get, set, setResult, deploy, fetch }
 from "./lib.js";
 
 let web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:8875");
+async function testWeb3() {
+  try {
+    await web3.eth.getCoinbase();
+  }
+  catch(error) {
+    document.body.innerHTML = "";
+    let web3Canvas = document.createElement("span");
+    web3Canvas.setAttribute("id", "web3 result");
+    document.body.appendChild(web3Canvas);
+    setResult("failure", "web3", error);
+  }
+}
+testWeb3();
+
 
 async function fetchContract() {
   let contract = document.getElementById("info contract");
