@@ -59,6 +59,13 @@ async function submitContract() {
   }
 }
 
+async function pay() {
+  let from = await web3.eth.getCoinbase();
+  let to = document.getElementById("info contract").value;
+  let value = document.getElementById("pay value").value;
+  let hash = web3.eth.sendTransaction({from:from, to:to, value:value});
+}
+
 function insertLink(canvas, id, name) {
   let link = document.createElement("a");
   links.push(link);
@@ -147,6 +154,14 @@ creationResult.setAttribute("id", "creation result");
 creationCanvas.appendChild(creationResult);
 
 let payCanvas = createCanvas("pay");
-payCanvas.innerHTML = "pay";
+insertInput(web3, payCanvas, "amount", "value", false);
+let payButton = document.createElement("button");
+payButton.setAttribute("id", "pay button");
+payButton.innerHTML = "pay";
+payButton.onclick = pay;
+payCanvas.appendChild(payButton);
+let payResult = document.createElement("span");
+payResult.setAttribute("id", "pay result");
+payCanvas.appendChild(payResult);
 
 let functionCanvas = createCanvas("function");
