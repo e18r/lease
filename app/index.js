@@ -78,7 +78,7 @@ async function submitContract() {
 
 async function pay() {
   try {
-    let from = get("addrSelect", "pay", "tenant");
+    let from = get("addrSelect", "pay", "sender");
     let to = document.getElementById("current address").value;
     let value = get("amount", "pay", "value");
     let transaction = {from:from, to:to, value:value};
@@ -142,13 +142,7 @@ let currentAddress = document.createElement("input");
 currentAddress.setAttribute("id", "current address");
 currentAddress.setAttribute("type", "hidden");
 info.appendChild(currentAddress);
-let fetchButton = document.createElement("button");
-fetchButton.innerHTML = "fetch";
-fetchButton.onclick = fetchContract;
-info.appendChild(fetchButton);
-let infoResult = document.createElement("span");
-infoResult.setAttribute("id", "info result");
-info.appendChild(infoResult);
+insertButton(info, fetchContract);
 info.appendChild(document.createElement("br"));
 insertInput(info, "address", "owner", true);
 insertInput(info, "address", "tenant", true);
@@ -165,7 +159,7 @@ document.body.appendChild(document.createElement("br"));
 let index = document.createElement("div");
 insertLink(index, "creation", "new contract");
 insertLink(index, "pay", "pay rent");
-insertLink(index, "function", "contract functions");
+insertLink(index, "door", "open door");
 document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
 
@@ -176,30 +170,41 @@ async function creationCanvas() {
   insertInput(creationCanvas, "date", "start", false);
   insertInput(creationCanvas, "amount", "fee", false);
   insertInput(creationCanvas, "amount", "deposit", false);
-  let submitButton = document.createElement("button");
-  submitButton.setAttribute("id", "submit");
-  submitButton.innerHTML = "new contract";
-  submitButton.onclick = submitContract;
-  creationCanvas.appendChild(submitButton);
-  let creationResult = document.createElement("span");
-  creationResult.setAttribute("id", "creation result");
-  creationCanvas.appendChild(creationResult);
+  insertButton(creationCanvas, submitContract);
 }
 creationCanvas();
 
 async function payCanvas() {
   let payCanvas = createCanvas("pay");
-  await addrSelect(payCanvas, "tenant");
+  await addrSelect(payCanvas, "sender");
   insertInput(payCanvas, "amount", "value", false);
-  let payButton = document.createElement("button");
-  payButton.setAttribute("id", "pay button");
-  payButton.innerHTML = "pay";
-  payButton.onclick = pay;
-  payCanvas.appendChild(payButton);
-  let payResult = document.createElement("span");
-  payResult.setAttribute("id", "pay result");
-  payCanvas.appendChild(payResult);
+  insertButton(payCanvas, pay);
 }
 payCanvas();
 
-let functionCanvas = createCanvas("function");
+function insertButton(canvas, fn) {
+  let id = canvas.getAttribute("id");
+  let button = document.createElement("button");
+  button.setAttribute("id", id + " button");
+  button.innerHTML = id;
+  button.onclick = fn;
+  canvas.appendChild(button);
+  let result = document.createElement("span");
+  result.setAttribute("id", id + " result");
+  canvas.appendChild(result);
+}
+
+async function door() {
+  let address = document.getElementById("current address").value;
+  let lease = fetch(address);
+  let sender = document.getElementById("door sender").value;
+  let result = await (await lease.methods.openDoor()).call({from:sender});
+  setResult("success", "door", result);
+}
+
+async function doorCanvas() {
+  let doorCanvas = createCanvas("door");
+  await addrSelect(doorCanvas, "sender");
+  insertButton(doorCanvas, door);
+}
+doorCanvas();

@@ -57,7 +57,7 @@ function insertInput(canvas, type, name, disabled) {
   }
   else if(type == "date") {
     label.innerHTML += " date";
-    input.setAttribute("size", 15);
+    input.setAttribute("size", 20);
   }
   else if(type == "amount") {
     label.innerHTML += " amount";
@@ -109,7 +109,7 @@ function set(type, canvas, name, value) {
       input.value = "(not set)";
     }
     else {
-      input.value = moment(value, "X").format("ddd, DD MMM YYYY");
+      input.value = moment(value, "X").format();
     }
   }
   else if(type == "amount") {
