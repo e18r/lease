@@ -86,7 +86,7 @@ function set(type, canvas, name, value) {
   }
   else if(type == "date") {
     if(value == 0) {
-      input.value = "not set";
+      input.value = "(not set)";
     }
     else {
       input.value = moment(value, "X").format("ddd, DD MMM YYYY");

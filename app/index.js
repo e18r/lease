@@ -25,7 +25,7 @@ async function fetchContract() {
     set("state", "info", "tenant state", state);
     set("amount", "info", "balance", balance);
     set("amount", "info", "withdrawn", withdrawn);
-    setResult("success", "info", "");
+    setResult("success", "info", "contract successfully fetched");
   }
   catch(error) {
     setResult("failure", "info", error);
@@ -51,6 +51,7 @@ async function submitContract() {
     setResult("success", "creation", "contract created at " + lease._address);
     let contract = document.getElementById("info contract");
     contract.value = lease._address;
+    contract.dispatchEvent(new Event("change"));
     fetchContract();
   }
   catch(error) {
@@ -58,18 +59,26 @@ async function submitContract() {
   }
 }
 
-function creation() {
-  ownerCanvas.style.display = "none";
-  ownerLink.style.color = "blue";
-  creationCanvas.style.display = "block";
-  creationLink.style.color = "grey";
-}
-
-function ownerAdmin() {
-  creationCanvas.style.display = "none";
-  creationLink.style.color = "blue";
-  ownerCanvas.style.display = "block";
-  ownerLink.style.color = "grey";
+let canvases = [];
+let links = [];
+function showCanvas(event) {
+  let id = event.target.id;
+  canvases.forEach((canvas) => {
+    if(canvas.getAttribute("id") == id && canvas.style.display == "none") {
+      canvas.style.display = "block";
+    }
+    else {
+      canvas.style.display = "none";
+    }
+  });
+  links.forEach((link) => {
+    if(link.getAttribute("id") == id) {
+      link.style.color = "grey";
+    }
+    else {
+      link.style.color = "blue";
+    }
+  });
 }
 
 let info = document.createElement("div");
@@ -79,6 +88,9 @@ let fetchButton = document.createElement("button");
 fetchButton.innerHTML = "fetch";
 fetchButton.onclick = fetchContract;
 info.appendChild(fetchButton);
+let infoResult = document.createElement("span");
+infoResult.setAttribute("id", "info result");
+info.appendChild(infoResult);
 info.appendChild(document.createElement("br"));
 insertInput(web3, info, "address", "owner", true);
 insertInput(web3, info, "address", "tenant", true);
@@ -89,31 +101,33 @@ insertInput(web3, info, "amount", "deposit", true);
 insertInput(web3, info, "state", "tenant state", true);
 insertInput(web3, info, "amount", "balance", true);
 insertInput(web3, info, "amount", "withdrawn", true);
-let infoResult = document.createElement("div");
-infoResult.setAttribute("id", "info result");
-info.appendChild(infoResult);
 document.body.appendChild(info);
 document.body.appendChild(document.createElement("br"));
 
 let index = document.createElement("div");
 let creationLink = document.createElement("a");
+links.push(creationLink);
+creationLink.setAttribute("id", "creation");
 creationLink.style.color = "blue";
 creationLink.setAttribute("href", "#");
 creationLink.innerHTML = "new contract";
-creationLink.onclick = creation;
+creationLink.onclick = showCanvas;
 index.appendChild(creationLink);
 index.insertAdjacentText("beforeend", " | ");
 let ownerLink = document.createElement("a");
+links.push(ownerLink);
+ownerLink.setAttribute("id", "owner");
 ownerLink.style.color = "blue";
 ownerLink.setAttribute("href", "#");
 ownerLink.innerHTML = "owner administration";
-ownerLink.onclick = ownerAdmin;
+ownerLink.onclick = showCanvas;
 index.appendChild(ownerLink);
 index.appendChild(document.createElement("br"));
 document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
 
 let creationCanvas = document.createElement("div");
+canvases.push(creationCanvas);
 creationCanvas.style.display = "none";
 document.body.appendChild(creationCanvas);
 creationCanvas.setAttribute("id", "creation");
@@ -126,11 +140,13 @@ submitButton.setAttribute("id", "submit");
 submitButton.innerHTML = "new contract";
 submitButton.onclick = submitContract;
 creationCanvas.appendChild(submitButton);
-let creationResult = document.createElement("div");
+let creationResult = document.createElement("span");
 creationResult.setAttribute("id", "creation result");
 creationCanvas.appendChild(creationResult);
 
 let ownerCanvas = document.createElement("div");
+canvases.push(ownerCanvas);
+ownerCanvas.setAttribute("id", "owner");
 ownerCanvas.style.display = "none";
 ownerCanvas.innerHTML = "owner";
 document.body.appendChild(ownerCanvas);
