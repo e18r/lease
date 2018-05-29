@@ -71,6 +71,15 @@ function insertLink(canvas, id, name) {
   canvas.insertAdjacentText("beforeend", " | ");
 }
 
+function createCanvas(id) {
+  let canvas = document.createElement("div");
+  canvases.push(canvas);
+  canvas.setAttribute("id", id);
+  canvas.style.display = "none";
+  document.body.appendChild(canvas);
+  return canvas;
+}
+
 let canvases = [];
 let links = [];
 function showCanvas(event) {
@@ -123,11 +132,7 @@ insertLink(index, "function", "contract functions");
 document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
 
-let creationCanvas = document.createElement("div");
-canvases.push(creationCanvas);
-creationCanvas.style.display = "none";
-document.body.appendChild(creationCanvas);
-creationCanvas.setAttribute("id", "creation");
+let creationCanvas = createCanvas("creation");
 insertInput(web3, creationCanvas, "address", "tenant", false);
 insertInput(web3, creationCanvas, "date", "start", false);
 insertInput(web3, creationCanvas, "amount", "fee", false);
@@ -141,17 +146,7 @@ let creationResult = document.createElement("span");
 creationResult.setAttribute("id", "creation result");
 creationCanvas.appendChild(creationResult);
 
-let payCanvas = document.createElement("div");
-canvases.push(payCanvas);
-payCanvas.setAttribute("id", "pay");
-payCanvas.style.display = "none";
+let payCanvas = createCanvas("pay");
 payCanvas.innerHTML = "pay";
-document.body.appendChild(payCanvas);
 
-
-let functionCanvas = document.createElement("div");
-canvases.push(functionCanvas);
-functionCanvas.setAttribute("id", "function");
-functionCanvas.style.display = "none";
-functionCanvas.innerHTML = "function";
-document.body.appendChild(functionCanvas);
+let functionCanvas = createCanvas("function");
