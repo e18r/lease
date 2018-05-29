@@ -14,6 +14,23 @@ let state = {
   "defaulted": 2
 };
 
+async function addrSelect(canvas, name) {
+  let label = document.createElement("label");
+  label.innerHTML = name + " address: ";
+  let select = document.createElement("select");
+  select.setAttribute("id", canvas.getAttribute("id") + " " + name);
+  let accounts = await web3.eth.getAccounts();
+  accounts.forEach((account) => {
+    let option = document.createElement("option");
+    option.setAttribute("value", account);
+    option.innerHTML = account;
+    select.appendChild(option);
+  });
+  label.appendChild(select);
+  canvas.appendChild(label);
+  canvas.appendChild(document.createElement("br"))
+}
+
 function insertInput(canvas, type, name, disabled) {
   let label = document.createElement("label");
   label.innerHTML = name;
@@ -62,6 +79,9 @@ function get(type, canvas, name) {
   let input = document.getElementById(canvas + " " + name);
   if(type == "address") {
     return input.value;
+  }
+  if(type == "addrSelect") {
+    return input.selectedOptions[0].value;
   }
   if(type == "date") {
     return moment(input.value).format("X");
@@ -138,4 +158,4 @@ function fetch(address) {
   return new web3.eth.Contract(leaseJSON.abi, address);
 }
 
-export { insertInput, get, set, setResult, deploy, fetch };
+export { addrSelect, insertInput, get, set, setResult, deploy, fetch };

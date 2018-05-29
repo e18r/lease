@@ -1,5 +1,6 @@
 import Web3 from "web3";
-import { insertInput, get, set, setResult, deploy, fetch } from "./lib.js";
+import { addrSelect, insertInput, get, set, setResult, deploy, fetch }
+from "./lib.js";
 
 let web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:8875");
 
@@ -16,6 +17,8 @@ async function fetchContract() {
     let state = await (await lease.methods.tenantState()).call();
     let balance = await web3.eth.getBalance(lease._address);
     let withdrawn = await (await lease.methods.withdrawn()).call();
+    let currentAddress = document.getElementById("current address");
+    currentAddress.value = contract.value;
     set("address", "info", "owner", owner);
     set("address", "info", "tenant", tenant);
     set("date", "info", "start", start);
@@ -34,7 +37,7 @@ async function fetchContract() {
 
 async function submitContract() {
   try {
-    let owner = await web3.eth.getCoinbase();    
+    let owner = get("addrSelect", "creation", "owner");
     let tenant = get("address", "creation", "tenant");
     let start = get("date", "creation", "start");
     let fee = get("amount", "creation", "fee");
@@ -60,10 +63,18 @@ async function submitContract() {
 }
 
 async function pay() {
-  let from = await web3.eth.getCoinbase();
-  let to = document.getElementById("info contract").value;
-  let value = document.getElementById("pay value").value;
-  let hash = web3.eth.sendTransaction({from:from, to:to, value:value});
+  try {
+    let from = get("addrSelect", "pay", "tenant");
+    let to = document.getElementById("current address").value;
+    let value = get("amount", "pay", "value");
+    let transaction = {from:from, to:to, value:value};
+    let receipt = await web3.eth.sendTransaction(transaction);
+    let message = "transaction sent with hash " + receipt.transactionHash;
+    setResult("success", "pay", message);
+  }
+  catch(error) {
+    setResult("failure", "pay", error);
+  }
 }
 
 function insertLink(canvas, id, name) {
@@ -112,6 +123,10 @@ function showCanvas(event) {
 let info = document.createElement("div");
 info.setAttribute("id", "info");
 insertInput(info, "address", "contract", false);
+let currentAddress = document.createElement("input");
+currentAddress.setAttribute("id", "current address");
+currentAddress.setAttribute("type", "hidden");
+info.appendChild(currentAddress);
 let fetchButton = document.createElement("button");
 fetchButton.innerHTML = "fetch";
 fetchButton.onclick = fetchContract;
@@ -139,29 +154,37 @@ insertLink(index, "function", "contract functions");
 document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
 
-let creationCanvas = createCanvas("creation");
-insertInput(creationCanvas, "address", "tenant", false);
-insertInput(creationCanvas, "date", "start", false);
-insertInput(creationCanvas, "amount", "fee", false);
-insertInput(creationCanvas, "amount", "deposit", false);
-let submitButton = document.createElement("button");
-submitButton.setAttribute("id", "submit");
-submitButton.innerHTML = "new contract";
-submitButton.onclick = submitContract;
-creationCanvas.appendChild(submitButton);
-let creationResult = document.createElement("span");
-creationResult.setAttribute("id", "creation result");
-creationCanvas.appendChild(creationResult);
+async function creationCanvas() {
+  let creationCanvas = createCanvas("creation");
+  await addrSelect(creationCanvas, "owner");
+  insertInput(creationCanvas, "address", "tenant", false);
+  insertInput(creationCanvas, "date", "start", false);
+  insertInput(creationCanvas, "amount", "fee", false);
+  insertInput(creationCanvas, "amount", "deposit", false);
+  let submitButton = document.createElement("button");
+  submitButton.setAttribute("id", "submit");
+  submitButton.innerHTML = "new contract";
+  submitButton.onclick = submitContract;
+  creationCanvas.appendChild(submitButton);
+  let creationResult = document.createElement("span");
+  creationResult.setAttribute("id", "creation result");
+  creationCanvas.appendChild(creationResult);
+}
+creationCanvas();
 
-let payCanvas = createCanvas("pay");
-insertInput(payCanvas, "amount", "value", false);
-let payButton = document.createElement("button");
-payButton.setAttribute("id", "pay button");
-payButton.innerHTML = "pay";
-payButton.onclick = pay;
-payCanvas.appendChild(payButton);
-let payResult = document.createElement("span");
-payResult.setAttribute("id", "pay result");
-payCanvas.appendChild(payResult);
+async function payCanvas() {
+  let payCanvas = createCanvas("pay");
+  await addrSelect(payCanvas, "tenant");
+  insertInput(payCanvas, "amount", "value", false);
+  let payButton = document.createElement("button");
+  payButton.setAttribute("id", "pay button");
+  payButton.innerHTML = "pay";
+  payButton.onclick = pay;
+  payCanvas.appendChild(payButton);
+  let payResult = document.createElement("span");
+  payResult.setAttribute("id", "pay result");
+  payCanvas.appendChild(payResult);
+}
+payCanvas();
 
 let functionCanvas = createCanvas("function");
