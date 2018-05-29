@@ -59,6 +59,18 @@ async function submitContract() {
   }
 }
 
+function insertLink(canvas, id, name) {
+  let link = document.createElement("a");
+  links.push(link);
+  link.setAttribute("id", id);
+  link.style.color = "blue";
+  link.setAttribute("href", "#");
+  link.innerHTML = name;
+  link.onclick = showCanvas;
+  canvas.appendChild(link);
+  canvas.insertAdjacentText("beforeend", " | ");
+}
+
 let canvases = [];
 let links = [];
 function showCanvas(event) {
@@ -105,24 +117,9 @@ document.body.appendChild(info);
 document.body.appendChild(document.createElement("br"));
 
 let index = document.createElement("div");
-let creationLink = document.createElement("a");
-links.push(creationLink);
-creationLink.setAttribute("id", "creation");
-creationLink.style.color = "blue";
-creationLink.setAttribute("href", "#");
-creationLink.innerHTML = "new contract";
-creationLink.onclick = showCanvas;
-index.appendChild(creationLink);
-index.insertAdjacentText("beforeend", " | ");
-let ownerLink = document.createElement("a");
-links.push(ownerLink);
-ownerLink.setAttribute("id", "owner");
-ownerLink.style.color = "blue";
-ownerLink.setAttribute("href", "#");
-ownerLink.innerHTML = "owner administration";
-ownerLink.onclick = showCanvas;
-index.appendChild(ownerLink);
-index.appendChild(document.createElement("br"));
+insertLink(index, "creation", "new contract");
+insertLink(index, "pay", "pay rent");
+insertLink(index, "function", "contract functions");
 document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
 
@@ -144,9 +141,17 @@ let creationResult = document.createElement("span");
 creationResult.setAttribute("id", "creation result");
 creationCanvas.appendChild(creationResult);
 
-let ownerCanvas = document.createElement("div");
-canvases.push(ownerCanvas);
-ownerCanvas.setAttribute("id", "owner");
-ownerCanvas.style.display = "none";
-ownerCanvas.innerHTML = "owner";
-document.body.appendChild(ownerCanvas);
+let payCanvas = document.createElement("div");
+canvases.push(payCanvas);
+payCanvas.setAttribute("id", "pay");
+payCanvas.style.display = "none";
+payCanvas.innerHTML = "pay";
+document.body.appendChild(payCanvas);
+
+
+let functionCanvas = document.createElement("div");
+canvases.push(functionCanvas);
+functionCanvas.setAttribute("id", "function");
+functionCanvas.style.display = "none";
+functionCanvas.innerHTML = "function";
+document.body.appendChild(functionCanvas);
