@@ -100,7 +100,7 @@ function showCanvas(event) {
     }
   });
   links.forEach((link) => {
-    if(link.getAttribute("id") == id) {
+    if(link.getAttribute("id") == id && link.style.color == "blue") {
       link.style.color = "grey";
     }
     else {
@@ -111,7 +111,7 @@ function showCanvas(event) {
 
 let info = document.createElement("div");
 info.setAttribute("id", "info");
-insertInput(web3, info, "address", "contract", false);
+insertInput(info, "address", "contract", false);
 let fetchButton = document.createElement("button");
 fetchButton.innerHTML = "fetch";
 fetchButton.onclick = fetchContract;
@@ -120,15 +120,15 @@ let infoResult = document.createElement("span");
 infoResult.setAttribute("id", "info result");
 info.appendChild(infoResult);
 info.appendChild(document.createElement("br"));
-insertInput(web3, info, "address", "owner", true);
-insertInput(web3, info, "address", "tenant", true);
-insertInput(web3, info, "date", "start", true);
-insertInput(web3, info, "date", "end", true);
-insertInput(web3, info, "amount", "fee", true);
-insertInput(web3, info, "amount", "deposit", true);
-insertInput(web3, info, "state", "tenant state", true);
-insertInput(web3, info, "amount", "balance", true);
-insertInput(web3, info, "amount", "withdrawn", true);
+insertInput(info, "address", "owner", true);
+insertInput(info, "address", "tenant", true);
+insertInput(info, "date", "start", true);
+insertInput(info, "date", "end", true);
+insertInput(info, "amount", "fee", true);
+insertInput(info, "amount", "deposit", true);
+insertInput(info, "state", "tenant state", true);
+insertInput(info, "amount", "balance", true);
+insertInput(info, "amount", "withdrawn", true);
 document.body.appendChild(info);
 document.body.appendChild(document.createElement("br"));
 
@@ -140,10 +140,10 @@ document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
 
 let creationCanvas = createCanvas("creation");
-insertInput(web3, creationCanvas, "address", "tenant", false);
-insertInput(web3, creationCanvas, "date", "start", false);
-insertInput(web3, creationCanvas, "amount", "fee", false);
-insertInput(web3, creationCanvas, "amount", "deposit", false);
+insertInput(creationCanvas, "address", "tenant", false);
+insertInput(creationCanvas, "date", "start", false);
+insertInput(creationCanvas, "amount", "fee", false);
+insertInput(creationCanvas, "amount", "deposit", false);
 let submitButton = document.createElement("button");
 submitButton.setAttribute("id", "submit");
 submitButton.innerHTML = "new contract";
@@ -154,7 +154,7 @@ creationResult.setAttribute("id", "creation result");
 creationCanvas.appendChild(creationResult);
 
 let payCanvas = createCanvas("pay");
-insertInput(web3, payCanvas, "amount", "value", false);
+insertInput(payCanvas, "amount", "value", false);
 let payButton = document.createElement("button");
 payButton.setAttribute("id", "pay button");
 payButton.innerHTML = "pay";

@@ -14,7 +14,7 @@ let state = {
   "defaulted": 2
 };
 
-function insertInput(web3, canvas, type, name, disabled) {
+function insertInput(canvas, type, name, disabled) {
   let label = document.createElement("label");
   label.innerHTML = name;
   let input = document.createElement("input");
