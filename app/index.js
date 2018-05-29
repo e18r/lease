@@ -85,6 +85,7 @@ async function pay() {
     let receipt = await web3.eth.sendTransaction(transaction);
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "pay", message);
+    fetchContract();
   }
   catch(error) {
     setResult("failure", "pay", error);
