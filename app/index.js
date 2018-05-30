@@ -160,6 +160,7 @@ let index = document.createElement("div");
 insertLink(index, "creation", "new contract");
 insertLink(index, "pay", "pay rent");
 insertLink(index, "door", "open door");
+insertLink(index, "withdraw", "withdraw");
 document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
 
@@ -208,3 +209,24 @@ async function doorCanvas() {
   insertButton(doorCanvas, door);
 }
 doorCanvas();
+
+async function withdraw() {
+  try {
+    let sender = get("addrSelect", "withdraw", "sender");
+    let address = document.getElementById("current address").value;
+    let lease = fetch(address);
+    let receipt = await (await lease.methods.withdraw()).send({from:sender});
+    let message = "transaction sent with hash " + receipt.transactionHash;
+    setResult("success", "withdraw", message);
+  }
+  catch(error) {
+    setResult("failure", "withdraw", error);
+  }
+}
+
+async function withdrawCanvas() {
+  let withdrawCanvas = createCanvas("withdraw");
+  await addrSelect(withdrawCanvas, "sender");
+  insertButton(withdrawCanvas, withdraw);
+}
+withdrawCanvas();
