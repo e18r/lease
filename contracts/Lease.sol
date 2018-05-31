@@ -70,6 +70,7 @@ contract Lease {
     uint actualEnd = Logic.getActualEnd(start, _earlyEnd);
     require(actualEnd >= getTime() + 30 days
 	    || tenantState == Logic.State.defaulted);
+    require(actualEnd <= getTime() + 3 * 30 days);
     emit TerminationNotice(actualEnd);
     end = actualEnd;
   }

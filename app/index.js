@@ -161,6 +161,7 @@ insertLink(index, "creation", "new contract");
 insertLink(index, "pay", "pay rent");
 insertLink(index, "door", "open door");
 insertLink(index, "withdraw", "withdraw");
+insertLink(index, "notify", "notify termination");
 document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
 
@@ -231,3 +232,28 @@ async function withdrawCanvas() {
   insertButton(withdrawCanvas, withdraw);
 }
 withdrawCanvas();
+
+async function notify() {
+  try {
+    let sender = get("addrSelect", "notify", "sender");
+    let earlyEnd = get("date", "notify", "early end");
+    let address = document.getElementById("current address").value;
+    let lease = fetch(address);
+    let notifyTermination = await lease.methods.notifyTermination(earlyEnd);
+    let receipt = await notifyTermination.send({from:sender});
+    let message = "transaction sent with hash " + receipt.transactionHash;
+    setResult("success", "notify", message);
+    fetchContract();
+  }
+  catch(error) {
+    setResult("failure", "notify", error);
+  }
+}
+
+async function notifyCanvas() {
+  let notifyCanvas = createCanvas("notify");
+  await addrSelect(notifyCanvas, "sender");
+  insertInput(notifyCanvas, "date", "early end", false);
+  insertButton(notifyCanvas, notify);
+}
+notifyCanvas();

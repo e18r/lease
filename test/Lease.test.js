@@ -541,6 +541,21 @@ contract("Lease", async (accounts) => {
       let expected = await instance.end();
       assert.equal(actualEnd.toNumber(), expected.toNumber());
     });
+
+    it("the actual end date can't be in more than three months", async () => {
+      let instance = await Lease.deployed();
+      let start = await instance.start();
+      await instance.mockTime(start.add(15*days), {gasPrice:gasPrice});
+      let earlyEnd = start.add(4*months);
+      let actualEnd = earlyEnd;
+      await assertThrowsAsync(
+	async () => {
+	  await instance.notifyTermination(earlyEnd, {from:accounts[OWNER],
+						      gasPrice:gasPrice});
+	},
+	  /revert/
+      );
+    });
     
   });
 
