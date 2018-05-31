@@ -162,6 +162,7 @@ insertLink(index, "pay", "pay rent");
 insertLink(index, "door", "open door");
 insertLink(index, "withdraw", "withdraw");
 insertLink(index, "notify", "notify termination");
+insertLink(index, "terminate", "terminate contract");
 document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
 
@@ -257,3 +258,26 @@ async function notifyCanvas() {
   insertButton(notifyCanvas, notify);
 }
 notifyCanvas();
+
+async function terminate() {
+  try {
+    let address = document.getElementById("current address").value;
+    let lease = fetch(address);
+    let sender = get("addrSelect", "terminate", "sender");
+    let terminate = await lease.methods.terminate();
+    let receipt = await terminate.send({from:sender});
+    let message = "transaction sent with hash " + receipt.transactionHash;
+    setResult("success", "terminate", message);
+    fetchContract();
+  }
+  catch(error) {
+    setResult("failure", "terminate", error);
+  }
+}
+
+async function terminateCanvas() {
+  let terminateCanvas = createCanvas("terminate");
+  await addrSelect(terminateCanvas, "sender");
+  insertButton(terminateCanvas, terminate);
+}
+terminateCanvas();
