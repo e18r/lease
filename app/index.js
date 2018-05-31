@@ -218,6 +218,7 @@ async function withdraw() {
     let receipt = await (await lease.methods.withdraw()).send({from:sender});
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "withdraw", message);
+    fetchContract();
   }
   catch(error) {
     setResult("failure", "withdraw", error);
