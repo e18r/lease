@@ -172,6 +172,7 @@ insertLink(index, "door", "open door");
 insertLink(index, "withdraw", "withdraw");
 insertLink(index, "notify", "notify termination");
 insertLink(index, "terminate", "terminate contract");
+insertLink(index, "remainder", "withdraw remainder");
 insertLink(index, "mock", "mock time");
 document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
@@ -292,6 +293,29 @@ async function terminateCanvas() {
   insertButton(terminateCanvas, terminate);
 }
 terminateCanvas();
+
+async function remainder() {
+  try {
+    let address = document.getElementById("current address").value;
+    let lease = fetch(address);
+    let sender = get("addrSelect", "remainder", "sender");
+    let remainder = await lease.methods.withdrawRemainder();
+    let receipt = await remainder.send({from:sender});
+    let message = "transaction sent with hash " + receipt.transactionHash;
+    setResult("success", "remainder", message);
+    fetchContract();
+  }
+  catch(error) {
+    setResult("failure", "remainder", error);
+  }
+}
+
+async function remainderCanvas() {
+  let remainderCanvas = createCanvas("remainder");
+  await addrSelect(remainderCanvas, "sender");
+  insertButton(remainderCanvas, remainder);
+}
+remainderCanvas();
 
 async function mock() {
   try {
