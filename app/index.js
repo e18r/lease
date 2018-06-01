@@ -31,7 +31,8 @@ async function fetchContract() {
     let state = await (await lease.methods.tenantState()).call();
     let balance = await web3.eth.getBalance(lease._address);
     let withdrawn = await (await lease.methods.withdrawn()).call();
-    let mock = Object.keys(lease.methods).indexOf("mockTime") != -1;
+    let now = await (await lease.methods.getTime()).call();
+    let mock = await (await lease.methods.isMock()).call();
     let currentAddress = document.getElementById("current address");
     currentAddress.value = contract.value;
     set("address", "info", "owner", owner);
@@ -43,6 +44,7 @@ async function fetchContract() {
     set("state", "info", "tenant state", state);
     set("amount", "info", "balance", balance);
     set("amount", "info", "withdrawn", withdrawn);
+    set("date", "info", "now", now);
     set("box", "info", "mock", mock);
     setResult("success", "info", "contract successfully fetched");
   }
@@ -64,7 +66,7 @@ async function submitContract() {
     let actualStart = await (await lease.methods.start()).call();
     let actualFee = await (await lease.methods.fee()).call();
     let actualDeposit = await (await lease.methods.deposit()).call();
-    let actualMock = Object.keys(lease.methods).indexOf("mockTime") != -1;
+    let actualMock = await (await lease.methods.isMock()).call();
     set("address", "creation", "tenant", actualTenant);
     set("date", "creation", "start", actualStart);
     set("amount", "creation", "fee", actualFee);
@@ -158,6 +160,7 @@ insertInput(info, "amount", "deposit", true);
 insertInput(info, "state", "tenant state", true);
 insertInput(info, "amount", "balance", true);
 insertInput(info, "amount", "withdrawn", true);
+insertInput(info, "date", "now", true);
 insertBox(info, "mock", true);
 document.body.appendChild(info);
 document.body.appendChild(document.createElement("br"));
@@ -169,6 +172,7 @@ insertLink(index, "door", "open door");
 insertLink(index, "withdraw", "withdraw");
 insertLink(index, "notify", "notify termination");
 insertLink(index, "terminate", "terminate contract");
+insertLink(index, "mock", "mock time");
 document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
 
@@ -288,3 +292,27 @@ async function terminateCanvas() {
   insertButton(terminateCanvas, terminate);
 }
 terminateCanvas();
+
+async function mock() {
+  try {
+    let address = document.getElementById("current address").value;
+    let lease = fetch(address);
+    let time = get("date", "mock", "time");
+    let mock = await lease.methods.mockTime(time);
+    let sender = await web3.eth.getCoinbase();
+    let receipt = await mock.send({from:sender});
+    let message = "transaction sent with hash " + receipt.transactionHash;
+    setResult("success", "mock", message);
+    fetchContract();
+  }
+  catch(error) {
+    setResult("failure", "mock", error);
+  }
+}
+
+function mockCanvas() {
+  let mockCanvas = createCanvas("mock");
+  insertInput(mockCanvas, "date", "time", false);
+  insertButton(mockCanvas, mock);
+}
+mockCanvas();

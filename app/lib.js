@@ -72,7 +72,7 @@ function insertInput(canvas, type, name, disabled) {
   }
   else if(type == "date") {
     label.innerHTML += " date";
-    input.setAttribute("size", 20);
+    input.setAttribute("size", 25);
   }
   else if(type == "amount") {
     label.innerHTML += " amount";
@@ -137,7 +137,7 @@ function set(type, canvas, name, value) {
     input.value = state[value];
   }
   else if(type == "box") {
-    input.setAttribute("checked", value);
+    input.checked = value;
   }
 }
 
@@ -193,7 +193,8 @@ async function deploy(web3, owner, tenant, startDate, fee, deposit, mock) {
 }
 
 function fetch(address) {
-  return new web3.eth.Contract(leaseJSON.abi, address);
+  let abi = leaseMockJSON.abi;
+  return new web3.eth.Contract(abi, address);
 }
 
 export { addrSelect, insertBox, insertInput, get, set, setResult, deploy,

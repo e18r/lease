@@ -110,4 +110,8 @@ contract Lease {
     return now;
   }
 
+  function isMock() public pure returns (bool) {
+    return false;
+  }
+
 }

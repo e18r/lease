@@ -36,4 +36,8 @@ contract LeaseMock is Lease {
     withdrawn = 0;
   }
 
+  function isMock() public pure returns (bool) {
+    return true;
+  }
+
 }
