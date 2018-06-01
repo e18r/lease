@@ -11,7 +11,8 @@
     "compile": "truffle compile",
     "deploy": "truffle migrate",
     "test": "scripts/test.sh",
-    "build": "webpack"
+    "build": "webpack",
+    "start": "webpack-dev-server --open"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,8 @@
     "html-webpack-plugin": "^3.2.0",
     "truffle": "^4.1.9",
     "webpack": "^4.8.3",
-    "webpack-command": "^0.2.0"
+    "webpack-cli": "^2.1.5",
+    "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
     "moment": "^2.22.1",

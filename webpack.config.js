@@ -4,6 +4,9 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
   entry: "./app/index.js",
   devtool: "inline-source-map",
+  devServer: {
+    contentBase: "./build"
+  },
   plugins: [
     new CleanWebpackPlugin("build", {exclude: ["contracts"]}),
     new HtmlWebpackPlugin({title: "Lease Contract"})
