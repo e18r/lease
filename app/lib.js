@@ -68,7 +68,7 @@ function insertInput(canvas, type, name, disabled) {
   };
   if(type == "address") {
     label.innerHTML += " address";
-    input.setAttribute("size", 40);
+    input.setAttribute("size", 50);
   }
   else if(type == "date") {
     label.innerHTML += " date";
