@@ -173,6 +173,7 @@ insertLink(index, "withdraw", "withdraw");
 insertLink(index, "notify", "notify termination");
 insertLink(index, "terminate", "terminate contract");
 insertLink(index, "remainder", "withdraw remainder");
+insertLink(index, "tenant", "update tenant state");
 insertLink(index, "mock", "mock time");
 document.body.appendChild(index);
 document.body.appendChild(document.createElement("hr"));
@@ -316,6 +317,28 @@ async function remainderCanvas() {
   insertButton(remainderCanvas, remainder);
 }
 remainderCanvas();
+
+async function tenant() {
+  try {
+    let address = document.getElementById("current address").value;
+    let sender = await web3.eth.getCoinbase();
+    let lease = fetch(address);
+    let tenant = await lease.methods.updateTenantState();
+    let receipt = await tenant.send({from:sender});
+    let message = "transaction sent with hash " + receipt.transactionHash;
+    setResult("success", "tenant", message);
+    fetchContract();
+  }
+  catch(error) {
+    setResult("failure", "tenant", error);
+  }
+}
+
+function tenantCanvas() {
+  let tenantCanvas = createCanvas("tenant");
+  insertButton(tenantCanvas, tenant);
+}
+tenantCanvas();
 
 async function mock() {
   try {
