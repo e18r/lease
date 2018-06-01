@@ -1,6 +1,6 @@
 import Web3 from "web3";
-import { addrSelect, insertInput, get, set, setResult, deploy, fetch }
-from "./lib.js";
+import { addrSelect, insertBox, insertInput, get, set, setResult, deploy,
+	 fetch } from "./lib.js";
 
 let web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:8875");
 async function testWeb3() {
@@ -31,6 +31,7 @@ async function fetchContract() {
     let state = await (await lease.methods.tenantState()).call();
     let balance = await web3.eth.getBalance(lease._address);
     let withdrawn = await (await lease.methods.withdrawn()).call();
+    let mock = Object.keys(lease.methods).indexOf("mockTime") != -1;
     let currentAddress = document.getElementById("current address");
     currentAddress.value = contract.value;
     set("address", "info", "owner", owner);
@@ -42,6 +43,7 @@ async function fetchContract() {
     set("state", "info", "tenant state", state);
     set("amount", "info", "balance", balance);
     set("amount", "info", "withdrawn", withdrawn);
+    set("box", "info", "mock", mock);
     setResult("success", "info", "contract successfully fetched");
   }
   catch(error) {
@@ -56,15 +58,18 @@ async function submitContract() {
     let start = get("date", "creation", "start");
     let fee = get("amount", "creation", "fee");
     let deposit = get("amount", "creation", "deposit");
-    let lease = await deploy(web3, owner, tenant, start, fee, deposit)
+    let mock = get("box", "creation", "mock");
+    let lease = await deploy(web3, owner, tenant, start, fee, deposit, mock)
     let actualTenant = await (await lease.methods.tenant()).call();
     let actualStart = await (await lease.methods.start()).call();
     let actualFee = await (await lease.methods.fee()).call();
     let actualDeposit = await (await lease.methods.deposit()).call();
+    let actualMock = Object.keys(lease.methods).indexOf("mockTime") != -1;
     set("address", "creation", "tenant", actualTenant);
     set("date", "creation", "start", actualStart);
     set("amount", "creation", "fee", actualFee);
     set("amount", "creation", "deposit", actualDeposit);
+    set("box", "creation", "mock", actualMock);
     setResult("success", "creation", "contract created at " + lease._address);
     let contract = document.getElementById("info contract");
     contract.value = lease._address;
@@ -153,6 +158,7 @@ insertInput(info, "amount", "deposit", true);
 insertInput(info, "state", "tenant state", true);
 insertInput(info, "amount", "balance", true);
 insertInput(info, "amount", "withdrawn", true);
+insertBox(info, "mock", true);
 document.body.appendChild(info);
 document.body.appendChild(document.createElement("br"));
 
@@ -173,6 +179,7 @@ async function creationCanvas() {
   insertInput(creationCanvas, "date", "start", false);
   insertInput(creationCanvas, "amount", "fee", false);
   insertInput(creationCanvas, "amount", "deposit", false);
+  insertBox(creationCanvas, "mock", false);
   insertButton(creationCanvas, submitContract);
 }
 creationCanvas();

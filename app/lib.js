@@ -1,6 +1,7 @@
 import Web3 from "web3";
 import logicJSON from "../build/contracts/Logic.json";
 import leaseJSON from "../build/contracts/Lease.json";
+import leaseMockJSON from "../build/contracts/LeaseMock.json";
 import linker from "solc/linker";
 import moment from "moment";
 
@@ -29,6 +30,20 @@ async function addrSelect(canvas, name) {
   label.appendChild(select);
   canvas.appendChild(label);
   canvas.appendChild(document.createElement("br"))
+}
+
+function insertBox(canvas, name, disabled) {
+  let label = document.createElement("label");
+  label.innerHTML = name + "? ";
+  let box = document.createElement("input");
+  box.setAttribute("type", "checkbox");
+  box.setAttribute("id", canvas.getAttribute("id") + " " + name);
+  if(disabled) {
+    box.setAttribute("disabled", true);
+  }
+  label.appendChild(box);
+  canvas.appendChild(label);
+  canvas.appendChild(document.createElement("br"));
 }
 
 function insertInput(canvas, type, name, disabled) {
@@ -97,6 +112,9 @@ function get(type, canvas, name) {
   if(type == "state") {
     return state[input.value];
   }
+  if(type == "box") {
+    return input.checked;
+  }
 }
 
 function set(type, canvas, name, value) {
@@ -118,6 +136,9 @@ function set(type, canvas, name, value) {
   else if(type == "state") {
     input.value = state[value];
   }
+  else if(type == "box") {
+    input.setAttribute("checked", value);
+  }
 }
 
 function setResult(type, canvas, message) {
@@ -132,7 +153,7 @@ function setResult(type, canvas, message) {
   resultCanvas.insertAdjacentText("beforeend", message);
 }
 
-async function deploy(web3, owner, tenant, startDate, fee, deposit) {
+async function deploy(web3, owner, tenant, startDate, fee, deposit, mock) {
   let Logic = new web3.eth.Contract(logicJSON.abi);
   let logic = await Logic.deploy({
     data: logicJSON.bytecode
@@ -151,11 +172,29 @@ async function deploy(web3, owner, tenant, startDate, fee, deposit) {
     from: owner,
     gasLimit: 2000000
   });
-  return lease;
+  if(mock) {
+    let LeaseMock = new web3.eth.Contract(leaseMockJSON.abi);
+    let linkedBytecode = linker.linkBytecode(leaseMockJSON.bytecode, {
+      Logic: logic._address,
+      Lease: lease._address,
+    });
+    let leaseMock = await LeaseMock.deploy({
+      data: linkedBytecode,
+      arguments: [tenant, startDate, fee, deposit]
+    }).send({
+      from: owner,
+      gasLimit: 2000000
+    });
+    return leaseMock;
+  }
+  else {
+    return lease;
+  }
 }
 
 function fetch(address) {
   return new web3.eth.Contract(leaseJSON.abi, address);
 }
 
-export { addrSelect, insertInput, get, set, setResult, deploy, fetch };
+export { addrSelect, insertBox, insertInput, get, set, setResult, deploy,
+	 fetch };
