@@ -5,7 +5,10 @@ import { addrSelect, insertBox, insertInput, get, set, setResult, deploy,
 let web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:8875");
 async function testWeb3() {
   try {
-    await web3.eth.getCoinbase();
+    let coinbase = await web3.eth.getCoinbase();
+    if(coinbase == null) {
+      throw "please unlock MetaMask";
+    }
   }
   catch(error) {
     document.body.innerHTML = "";
