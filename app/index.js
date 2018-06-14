@@ -22,8 +22,9 @@ async function testWeb3() {
 testWeb3();
 
 async function fetchContract() {
-  let contract = document.getElementById("info contract");
   try {
+    setResult("wait", "info", "fetching contract...");
+    let contract = document.getElementById("info contract");
     let lease = fetch(contract.value);
     let owner = await (await lease.methods.owner()).call();
     let tenant = await (await lease.methods.tenant()).call();
@@ -59,6 +60,7 @@ async function fetchContract() {
 
 async function submitContract() {
   try {
+    setResult("wait", "creation", "deploying contract...");
     let owner = get("addrSelect", "creation", "owner");
     let tenant = get("address", "creation", "tenant");
     let start = get("date", "creation", "start");
@@ -90,6 +92,7 @@ async function submitContract() {
 
 async function pay() {
   try {
+    setResult("wait", "pay", "sending payment...");
     let from = get("addrSelect", "pay", "sender");
     let to = document.getElementById("current address").value;
     let value = get("amount", "pay", "value");
@@ -217,6 +220,7 @@ function insertButton(canvas, fn) {
 }
 
 async function door() {
+  setResult("wait", "door", "trying to open door...");
   let address = document.getElementById("current address").value;
   let lease = fetch(address);
   let sender = document.getElementById("door sender").value;
@@ -233,6 +237,7 @@ doorCanvas();
 
 async function withdraw() {
   try {
+    setResult("wait", "withdraw", "withdrawing...");
     let sender = get("addrSelect", "withdraw", "sender");
     let address = document.getElementById("current address").value;
     let lease = fetch(address);
@@ -256,12 +261,13 @@ withdrawCanvas();
 
 async function notify() {
   try {
+    setResult("wait", "notify", "sending notification...");
     let sender = get("addrSelect", "notify", "sender");
     let earlyEnd = get("date", "notify", "early end");
     let address = document.getElementById("current address").value;
     let lease = fetch(address);
     let notifyTermination = await lease.methods.notifyTermination(earlyEnd);
-    let receipt = await notifyTermination.send({from:sender});
+    let receipt = await notifyTermination.send({from:sender}); //, gasLimit:1000000});
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "notify", message);
     fetchContract();
@@ -282,6 +288,7 @@ notifyCanvas();
 
 async function terminate() {
   try {
+    setResult("wait", "terminate", "terminating contract...");
     let address = document.getElementById("current address").value;
     let lease = fetch(address);
     let sender = get("addrSelect", "terminate", "sender");
@@ -306,6 +313,7 @@ terminateCanvas();
 
 async function remainder() {
   try {
+    setResult("wait", "remainder", "withdrawing remainder...");
     let address = document.getElementById("current address").value;
     let lease = fetch(address);
     let sender = get("addrSelect", "remainder", "sender");
@@ -330,6 +338,7 @@ remainderCanvas();
 
 async function tenant() {
   try {
+    setResult("wait", "tenant", "updating...");
     let address = document.getElementById("current address").value;
     let sender = await web3.eth.getCoinbase();
     let lease = fetch(address);
@@ -353,6 +362,7 @@ tenantCanvas();
 
 async function mock() {
   try {
+    setResult("wait", "mock", "mocking time...");
     let address = document.getElementById("current address").value;
     let lease = fetch(address);
     let time = get("date", "mock", "time");

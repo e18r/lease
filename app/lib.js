@@ -5,7 +5,7 @@ import leaseMockJSON from "../build/contracts/LeaseMock.json";
 import linker from "solc/linker";
 import moment from "moment";
 
-let web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:8875");
+let web3 = new Web3(Web3.givenProvider);
 let state = {
   0: "on time",
   1: "belated",
@@ -68,7 +68,7 @@ function insertInput(canvas, type, name, disabled) {
   };
   if(type == "address") {
     label.innerHTML += " address";
-    input.setAttribute("size", 50);
+    input.setAttribute("size", 55);
   }
   else if(type == "date") {
     label.innerHTML += " date";
@@ -144,7 +144,10 @@ function set(type, canvas, name, value) {
 function setResult(type, canvas, message) {
   let resultCanvas = document.getElementById(canvas + " result");
   resultCanvas.innerHTML = "";
-  if(type == "success") {
+  if(type == "wait") {
+    resultCanvas.style.border = "1px solid black";
+  }
+  else if(type == "success") {
     resultCanvas.style.border = "1px solid #00AA00";
   }
   else if(type == "failure") {
@@ -188,7 +191,7 @@ async function deploy(web3, owner, tenant, startDate, fee, deposit, mock) {
   if(mock) {
     let LeaseMock = new web3.eth.Contract(leaseMockJSON.abi);
     let linkedBytecode = linker.linkBytecode(leaseMockJSON.bytecode, {
-      Logic: logic._address,
+      Logic: logicAddress,
       Lease: lease._address,
     });
     let leaseMock = await LeaseMock.deploy({
