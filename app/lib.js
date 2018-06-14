@@ -153,7 +153,7 @@ function setResult(type, canvas, message) {
   resultCanvas.insertAdjacentText("beforeend", message);
 }
 
-async function deploy(web3, owner, tenant, startDate, fee, deposit, mock) {
+async function deployLogic(web3, owner) {
   let Logic = new web3.eth.Contract(logicJSON.abi);
   let logic = await Logic.deploy({
     data: logicJSON.bytecode
@@ -161,9 +161,22 @@ async function deploy(web3, owner, tenant, startDate, fee, deposit, mock) {
     from: owner,
     gasLimit: 500000
   });
+  return logic._address;
+}
+
+async function getLogicAddress(web3, owner) {
+  let network = await web3.eth.net.getNetworkType();
+  if(network == "kovan") {
+    return "0xf554ce01f91b09070d25c33e07c908cf89ec45db";
+  }
+  else return deployLogic(web3, owner);
+}
+
+async function deploy(web3, owner, tenant, startDate, fee, deposit, mock) {
+  let logicAddress = await getLogicAddress(web3, owner);
   let Lease = new web3.eth.Contract(leaseJSON.abi);
   let linkedBytecode = linker.linkBytecode(leaseJSON.bytecode, {
-    Logic: logic._address
+    Logic: logicAddress
   });
   let lease = await Lease.deploy({
     data: linkedBytecode,
