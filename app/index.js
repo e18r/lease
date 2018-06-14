@@ -11,6 +11,7 @@ async function testWeb3() {
     }
   }
   catch(error) {
+    console.log(error);
     document.body.innerHTML = "";
     let web3Canvas = document.createElement("span");
     web3Canvas.setAttribute("id", "web3 result");
@@ -19,7 +20,6 @@ async function testWeb3() {
   }
 }
 testWeb3();
-
 
 async function fetchContract() {
   let contract = document.getElementById("info contract");
@@ -52,6 +52,7 @@ async function fetchContract() {
     setResult("success", "info", "contract successfully fetched");
   }
   catch(error) {
+    console.log(error);
     setResult("failure", "info", error);
   }
 }
@@ -82,6 +83,7 @@ async function submitContract() {
     fetchContract();
   }
   catch(error) {
+    console.log(error);
     setResult("failure", "creation", error)
   }
 }
@@ -98,6 +100,7 @@ async function pay() {
     fetchContract();
   }
   catch(error) {
+    console.log(error);
     setResult("failure", "pay", error);
   }
 }
@@ -239,6 +242,7 @@ async function withdraw() {
     fetchContract();
   }
   catch(error) {
+    console.log(error);
     setResult("failure", "withdraw", error);
   }
 }
@@ -263,6 +267,7 @@ async function notify() {
     fetchContract();
   }
   catch(error) {
+    console.log(error);
     setResult("failure", "notify", error);
   }
 }
@@ -287,6 +292,7 @@ async function terminate() {
     fetchContract();
   }
   catch(error) {
+    console.log(error);
     setResult("failure", "terminate", error);
   }
 }
@@ -310,6 +316,7 @@ async function remainder() {
     fetchContract();
   }
   catch(error) {
+    console.log(error);
     setResult("failure", "remainder", error);
   }
 }
@@ -333,6 +340,7 @@ async function tenant() {
     fetchContract();
   }
   catch(error) {
+    console.log(error);
     setResult("failure", "tenant", error);
   }
 }
@@ -356,6 +364,7 @@ async function mock() {
     fetchContract();
   }
   catch(error) {
+    console.log(error);
     setResult("failure", "mock", error);
   }
 }
