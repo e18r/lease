@@ -158,13 +158,10 @@ function setResult(type, canvas, message) {
 
 async function deployLogic(web3, owner) {
   let Logic = new web3.eth.Contract(logicJSON.abi);
-  let logic = await Logic.deploy({
-    data: logicJSON.bytecode
-  }).send({
-    from: owner,
-    gasLimit: 500000
-  });
-  return logic._address;
+  let logic = await Logic.deploy({data: logicJSON.bytecode});
+  let tx = {from: owner, gasLimit: 342447};
+  let receipt = await logic.send(tx);
+  return receipt._address;
 }
 
 async function getLogicAddress(web3, owner) {
@@ -184,24 +181,22 @@ async function deploy(web3, owner, tenant, startDate, fee, deposit, mock) {
   let lease = await Lease.deploy({
     data: linkedBytecode,
     arguments: [tenant, startDate, fee, deposit]
-  }).send({
-    from: owner,
-    gasLimit: 2000000
   });
+  let tx = {from: owner, gasLimit: 1619691};
+  let leaseReceipt = await lease.send(tx);
   if(mock) {
     let LeaseMock = new web3.eth.Contract(leaseMockJSON.abi);
     let linkedBytecode = linker.linkBytecode(leaseMockJSON.bytecode, {
       Logic: logicAddress,
-      Lease: lease._address,
+      Lease: leaseReceipt._address
     });
     let leaseMock = await LeaseMock.deploy({
       data: linkedBytecode,
       arguments: [tenant, startDate, fee, deposit]
-    }).send({
-      from: owner,
-      gasLimit: 2000000
     });
-    return leaseMock;
+    let tx = {from: owner};
+    let leaseMockReceipt = await leaseMock.send(tx);
+    return leaseMockReceipt;
   }
   else {
     return lease;
