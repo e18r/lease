@@ -241,7 +241,8 @@ async function withdraw() {
     let sender = get("addrSelect", "withdraw", "sender");
     let address = document.getElementById("current address").value;
     let lease = fetch(address);
-    let receipt = await (await lease.methods.withdraw()).send({from:sender});
+    let tx = {from:sender, gasLimit:34232};
+    let receipt = await (await lease.methods.withdraw()).send(tx);
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "withdraw", message);
     fetchContract();
@@ -267,7 +268,8 @@ async function notify() {
     let address = document.getElementById("current address").value;
     let lease = fetch(address);
     let notifyTermination = await lease.methods.notifyTermination(earlyEnd);
-    let receipt = await notifyTermination.send({from:sender}); //, gasLimit:1000000});
+    let tx = {from:sender, gasLimit:47588}
+    let receipt = await notifyTermination.send(tx);
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "notify", message);
     fetchContract();
@@ -293,7 +295,8 @@ async function terminate() {
     let lease = fetch(address);
     let sender = get("addrSelect", "terminate", "sender");
     let terminate = await lease.methods.terminate();
-    let receipt = await terminate.send({from:sender});
+    let tx = {from:sender, gasLimit:14541};
+    let receipt = await terminate.send(tx);
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "terminate", message);
     fetchContract();
@@ -318,7 +321,8 @@ async function remainder() {
     let lease = fetch(address);
     let sender = get("addrSelect", "remainder", "sender");
     let remainder = await lease.methods.withdrawRemainder();
-    let receipt = await remainder.send({from:sender});
+    let tx = {from:sender, gasLimit:39420};
+    let receipt = await remainder.send(tx);
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "remainder", message);
     fetchContract();
@@ -343,7 +347,8 @@ async function tenant() {
     let sender = await web3.eth.getCoinbase();
     let lease = fetch(address);
     let tenant = await lease.methods.updateTenantState();
-    let receipt = await tenant.send({from:sender});
+    let tx = {from:sender, gasLimit:37157};
+    let receipt = await tenant.send(tx);
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "tenant", message);
     fetchContract();
