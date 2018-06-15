@@ -47,6 +47,25 @@ contract("Logic", async (accounts) => {
 });
 
 contract("Lease", async (accounts) => {
+
+  // it("updateTenantState() 2", async () => {
+  //   let instance = await Lease.deployed();
+  //   web3.eth.sendTransaction({from:accounts[TENANT], to:instance.address,
+  // 			      value:3000});
+  //   await instance.updateTenantState();
+  //   await instance.mockTime(now + 2*months);
+  //   await instance.mockEnd(now + 2*months);
+  //   await fnGas.apply(this, [accounts[OWNER], instance.updateTenantState]);
+  // });
+
+  // it("withdraw() 2", async () => {
+  //   let instance = await Lease.deployed();
+  //   let tx = {from:accounts[TENANT], to:instance.address, value:2000};
+  //   web3.eth.sendTransaction(tx);
+  //   await instance.mockTime(now + 1*months);
+  //   await instance.updateTenantState();
+  //   await fnGas.apply(this, [accounts[OWNER], instance.withdraw]);
+  // });
   
   it("constructor", async () => {
     let owner = accounts[OWNER];

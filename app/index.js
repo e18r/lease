@@ -241,7 +241,7 @@ async function withdraw() {
     let sender = get("addrSelect", "withdraw", "sender");
     let address = document.getElementById("current address").value;
     let lease = fetch(address);
-    let tx = {from:sender, gasLimit:34232};
+    let tx = {from:sender, gasLimit:56317};
     let receipt = await (await lease.methods.withdraw()).send(tx);
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "withdraw", message);
@@ -347,7 +347,7 @@ async function tenant() {
     let sender = await web3.eth.getCoinbase();
     let lease = fetch(address);
     let tenant = await lease.methods.updateTenantState();
-    let tx = {from:sender, gasLimit:37157};
+    let tx = {from:sender, gasLimit:52236};
     let receipt = await tenant.send(tx);
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "tenant", message);
