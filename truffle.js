@@ -15,5 +15,11 @@ module.exports = {
       },
       network_id: 42
     }
+  },
+  mocha: {
+    reporter: "eth-gas-reporter",
+    reporterOptions: {
+      currency: "USD",
+    }
   }
 };
