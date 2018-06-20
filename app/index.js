@@ -96,7 +96,7 @@ async function pay() {
     let from = get("addrSelect", "pay", "sender");
     let to = document.getElementById("current address").value;
     let value = get("amount", "pay", "value");
-    let transaction = {from:from, to:to, value:value};
+    let transaction = {from:from, to:to, value:value, gasLimit:22976};
     let receipt = await web3.eth.sendTransaction(transaction);
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "pay", message);
@@ -268,7 +268,7 @@ async function notify() {
     let address = document.getElementById("current address").value;
     let lease = fetch(address);
     let notifyTermination = await lease.methods.notifyTermination(earlyEnd);
-    let tx = {from:sender, gasLimit:47588}
+    let tx = {from:sender, gasLimit:47873}
     let receipt = await notifyTermination.send(tx);
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "notify", message);
@@ -295,7 +295,7 @@ async function terminate() {
     let lease = fetch(address);
     let sender = get("addrSelect", "terminate", "sender");
     let terminate = await lease.methods.terminate();
-    let tx = {from:sender, gasLimit:14541};
+    let tx = {from:sender, gasLimit:14670};
     let receipt = await terminate.send(tx);
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "terminate", message);
@@ -373,7 +373,7 @@ async function mock() {
     let time = get("date", "mock", "time");
     let mock = await lease.methods.mockTime(time);
     let sender = await web3.eth.getCoinbase();
-    let receipt = await mock.send({from:sender});
+    let receipt = await mock.send({from:sender, gasLimit:41883});
     let message = "transaction sent with hash " + receipt.transactionHash;
     setResult("success", "mock", message);
     fetchContract();

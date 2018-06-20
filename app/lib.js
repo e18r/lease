@@ -182,7 +182,7 @@ async function deploy(web3, owner, tenant, startDate, fee, deposit, mock) {
     data: linkedBytecode,
     arguments: [tenant, startDate, fee, deposit]
   });
-  let tx = {from: owner, gasLimit: 1619691};
+  let tx = {from: owner, gasLimit: 1619819};
   let leaseReceipt = await lease.send(tx);
   if(mock) {
     let LeaseMock = new web3.eth.Contract(leaseMockJSON.abi);
@@ -194,7 +194,7 @@ async function deploy(web3, owner, tenant, startDate, fee, deposit, mock) {
       data: linkedBytecode,
       arguments: [tenant, startDate, fee, deposit]
     });
-    let tx = {from: owner};
+    let tx = {from: owner, gasLimit: 1619819};
     let leaseMockReceipt = await leaseMock.send(tx);
     return leaseMockReceipt;
   }
