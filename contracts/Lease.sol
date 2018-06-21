@@ -66,11 +66,10 @@ contract Lease {
   function notifyTermination(uint _earlyEnd) external {
     require(msg.sender == owner || msg.sender == tenant);
     require(getTime() >= start);
-    require(end == 0);
     uint actualEnd = Logic.getActualEnd(start, _earlyEnd);
     require(actualEnd >= getTime() + 30 days
 	    || tenantState == Logic.State.defaulted);
-    require(actualEnd <= getTime() + 3 * 30 days);
+    require(end == 0 || actualEnd < end);
     emit TerminationNotice(actualEnd);
     end = actualEnd;
   }

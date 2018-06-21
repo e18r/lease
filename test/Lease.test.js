@@ -497,21 +497,18 @@ contract("Lease", async (accounts) => {
       );
     });
 
-    it("cannot be called twice", async () => {
+    it("can be updated with a shorter termination time", async () => {
       let instance = await Lease.deployed();
       let start = await instance.start();
       await instance.mockTime(start.add(15*days), {gasPrice:gasPrice});
-      let earlyEnd = start.add(2*months).add(15*days);
-      await instance.notifyTermination(earlyEnd, {from:accounts[TENANT],
-						  gasPrice:gasPrice});
-      await assertThrowsAsync(
-	async () => {
-	  await instance.notifyTermination(earlyEnd + 1*months,
-					   {from:accounts[OWNER],
-					    gasPrice:gasPrice});
-	},
-	  /revert/
-      );
+      let expectedEnd1 = start.add(3*months);
+      let expectedEnd2 = expectedEnd1.sub(1*months);
+      await instance.notifyTermination(expectedEnd1, {from:accounts[TENANT],
+      						      gasPrice:gasPrice});
+      await instance.notifyTermination(expectedEnd2, {from:accounts[OWNER],
+      						      gasPrice:gasPrice});
+      let actualEnd = await instance.end();
+      assert.equal(actualEnd.toNumber(), expectedEnd2.toNumber());
     });
 
     it("the actual end date can't be in less than a month...", async () => {
@@ -542,19 +539,15 @@ contract("Lease", async (accounts) => {
       assert.equal(actualEnd.toNumber(), expected.toNumber());
     });
 
-    it("the actual end date can't be in more than three months", async () => {
+    it("the actual end date can be in more than three months", async () => {
       let instance = await Lease.deployed();
       let start = await instance.start();
       await instance.mockTime(start.add(15*days), {gasPrice:gasPrice});
-      let earlyEnd = start.add(4*months);
-      let actualEnd = earlyEnd;
-      await assertThrowsAsync(
-	async () => {
-	  await instance.notifyTermination(earlyEnd, {from:accounts[OWNER],
-						      gasPrice:gasPrice});
-	},
-	  /revert/
-      );
+      let expectedEnd = start.add(4*months);
+      await instance.notifyTermination(expectedEnd, {from:accounts[OWNER],
+						  gasPrice:gasPrice});
+      let actualEnd = await instance.end();
+      assert.equal(actualEnd.toNumber(), expectedEnd.toNumber());
     });
     
   });
